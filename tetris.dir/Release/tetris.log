@@ -1,0 +1,9 @@
+﻿  Building Custom Rule C:/Users/rodoc/HOME/developpement/visual/Tetris/CMakeLists.txt
+  tetris.cpp
+  board.cpp
+  animatedBackground.cpp
+  particles.cpp
+  fog.cpp
+  audioStream.cpp
+  Génération de code en cours...
+  tetris.vcxproj -> C:\Users\rodoc\HOME\developpement\visual\Tetris\Release\tetris.exe
