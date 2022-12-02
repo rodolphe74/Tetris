@@ -11,5 +11,6 @@ CTestTestfile.cmake
 _deps
 /.vs
 /tetris.dir/Debug
+/tetris.dir/Release
 /main.dir
 /x64
