@@ -21,6 +21,6 @@ class AudioStream : public sf::SoundStream
     std::size_t m_currentSample = 0;
     float m_fpeakAmp = 0.0f;
     void load(sf::SoundBuffer& buffer);
-    void computePeakAmp();
+    void computePeakAmp(int samplesCount);
     void stop();
 };

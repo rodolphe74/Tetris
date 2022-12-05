@@ -2,8 +2,8 @@
 
 #include "audioStream.h"
 #include "constants.h"
-#include "particles.h"
 #include "fog.h"
+#include "particles.h"
 #include "shapes.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -38,6 +38,7 @@ class Board
     // Timers
     sf::Clock m_waitClock;
     sf::Clock m_allowedTimeToMoveAwayClock;
+    sf::Clock m_keyLatencyClock;
 
     // Sounds
     sf::SoundBuffer m_soundBufferIntro;
@@ -52,6 +53,10 @@ class Board
     sf::Sound m_soundMove;
     sf::SoundBuffer m_soundBufferWarp;
     sf::Sound m_soundWarp;
+    sf::SoundBuffer m_soundBufferHurry;
+    sf::Sound m_soundHurry;
+    sf::SoundBuffer m_soundBufferGameOver;
+    sf::Sound m_soundGameOver;
 
     Particles m_particles;
     Fog m_fog;
@@ -70,7 +75,11 @@ class Board
     float m_currentLineExtension = 0.0f;
     float m_currentLineExtensionStep = 1.0f;
     int m_ishapesQueue[6];
-    bool m_boolOnceLineSound = false;
+    bool m_boolonceLineSound = false;
+    bool m_boolshouldRotate = 0;
+    bool m_boolshouldWarp = 0;
+    int m_ilevel = 0;
+    int m_icountLines = 0;
 
   public:
     GameState m_egameState = none;
@@ -96,7 +105,7 @@ class Board
         }
 
         // load square sprite
-        if (!m_squareTexture.loadFromFile("big_square_clear.png")) {
+        if (!m_squareTexture.loadFromFile("resources/big_square_clear.png")) {
             perror("can't load texture");
         }
         m_squareTexture.setSmooth(true);
@@ -113,7 +122,7 @@ class Board
         m_smallSquareSprite.setScale(rx, ry);
 
         // load border sprite
-        if (!m_borderTexture.loadFromFile("borderb.png")) {
+        if (!m_borderTexture.loadFromFile("resources/borderb.png")) {
             perror("can't load texture");
         }
         m_borderTexture.setSmooth(true);
@@ -127,40 +136,60 @@ class Board
         printf("%f\n", m_borderSprite.getGlobalBounds().height);
 
         // load font
-        if (!m_gameFont.loadFromFile("Brick3DRegular-nRJR4.ttf")) {
+        if (!m_gameFont.loadFromFile("resources/Brick3DRegular-nRJR4.ttf")) {
             perror("can't load font");
         }
 
         // load sounds
-        if (!m_soundBufferExplode.loadFromFile("explode.ogg")) {
+        if (!m_soundBufferExplode.loadFromFile("resources/explode.ogg")) {
             perror("can't load sound");
         }
         m_soundExplode.setBuffer(m_soundBufferExplode);
 
-        if (!m_soundBufferRotate.loadFromFile("rotate.ogg")) {
+        if (!m_soundBufferRotate.loadFromFile("resources/rotate.ogg")) {
             perror("can't load sound");
         }
         m_soundRotate.setBuffer(m_soundBufferRotate);
 
-        if (!m_soundBufferMove.loadFromFile("move.ogg")) {
+        if (!m_soundBufferMove.loadFromFile("resources/move.ogg")) {
             perror("can't load sound");
         }
         m_soundMove.setBuffer(m_soundBufferMove);
 
-        if (!m_soundBufferLine.loadFromFile("line.ogg")) {
+        if (!m_soundBufferLine.loadFromFile("resources/line.ogg")) {
             perror("can't load sound");
         }
         m_soundLine.setBuffer(m_soundBufferLine);
 
-        if (!m_soundBufferWarp.loadFromFile("warp.ogg")) {
+        if (!m_soundBufferWarp.loadFromFile("resources/warp.ogg")) {
             perror("can't load sound");
         }
         m_soundWarp.setBuffer(m_soundBufferWarp);
 
-        if (!m_soundBufferIntro.loadFromFile("intro.ogg")) {
+        if (!m_soundBufferIntro.loadFromFile("resources/intro.ogg")) {
             perror("can't load sound");
         }
         m_soundIntro.setBuffer(m_soundBufferIntro);
+
+        if (!m_soundBufferWarp.loadFromFile("resources/warp.ogg")) {
+            perror("can't load sound");
+        }
+        m_soundWarp.setBuffer(m_soundBufferWarp);
+
+        if (!m_soundBufferIntro.loadFromFile("resources/intro.ogg")) {
+            perror("can't load sound");
+        }
+        m_soundIntro.setBuffer(m_soundBufferIntro);
+
+        if (!m_soundBufferHurry.loadFromFile("resources/hurry.ogg")) {
+            perror("can't load sound");
+        }
+        m_soundHurry.setBuffer(m_soundBufferHurry);
+
+        if (!m_soundBufferGameOver.loadFromFile("resources/gameover.ogg")) {
+            perror("can't load sound");
+        }
+        m_soundGameOver.setBuffer(m_soundBufferGameOver);
 
         srand((unsigned int)time(NULL));
         for (int i = 0; i < sizeof(m_ishapesQueue) / sizeof(int); i++) {
@@ -168,6 +197,9 @@ class Board
                       (static_cast<float>(RAND_MAX / 6.0f));
             m_ishapesQueue[i] = (int)round(s);
         }
+
+        bool m_shouldRotate = 0;
+        bool m_shouldWarp = 0;
     }
 
     void renderSquare(const tt::rect& squareRect,
@@ -179,6 +211,7 @@ class Board
                 float shiftHeight,
                 int& framesCount,
                 int frameRate);
+    void checkKeyboard();
     void drawFreezedAndGhostSquares(float shiftLeft, float shiftHeight);
     void clear();
     void clearCurrentShape();
@@ -205,4 +238,6 @@ class Board
     void playIntro();
     void downSpecifics();
     tt::rect locateCurrentShape();
+    float getNextLevelMultiplier();
+    float getCurrentLevelMultiplier();
 };

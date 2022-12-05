@@ -10,7 +10,7 @@ Fog::Fog()
     m_fogSprite = NULL;
     m_iWidth = 1;
 
-    if (!m_fogTexture.loadFromFile("warp.png")) {
+    if (!m_fogTexture.loadFromFile("resources/warp.png")) {
         perror("can't load texture");
     }
 

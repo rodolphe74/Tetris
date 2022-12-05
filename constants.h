@@ -29,4 +29,4 @@ constexpr int NEXT_SHAPES_SHIFT_HEIGHT = 99;
 constexpr float SMALL_SHAPE_REDUCTION_FACTOR = 2.6f;
 
 constexpr float QUICK_TIME_MULTIPLIER = 0.08f;
-constexpr float NORMAL_TIME_MULTIPLIER = 0.6f;
+constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;

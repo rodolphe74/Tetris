@@ -122,7 +122,9 @@ Board::render(float shiftLeft,
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
-            m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER;
+            // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
+            // m_ftimeMultiplier = getNextLevelMultiplier();
+            m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_boolAllowedTimeStarted = false;
             m_boolCanAccelerate = false;
         }
@@ -146,7 +148,9 @@ Board::render(float shiftLeft,
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
-            m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER;
+            // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
+            // m_ftimeMultiplier = getNextLevelMultiplier();
+            m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_boolAllowedTimeStarted = false;
             m_boolCanAccelerate = false;
         }
@@ -212,6 +216,7 @@ Board::render(float shiftLeft,
                     }
                 }
                 m_egameState = gameOver;
+                m_soundGameOver.play();
             }
         }
     }
@@ -239,9 +244,9 @@ Board::render(float shiftLeft,
         }
 
         m_currentLineExtension += m_currentLineExtensionStep;
-        if (!m_boolOnceLineSound) {
+        if (!m_boolonceLineSound) {
             m_soundLine.play();
-            m_boolOnceLineSound = true;
+            m_boolonceLineSound = true;
         }
 
         //  Wait a bit before scrolling lines down
@@ -250,22 +255,88 @@ Board::render(float shiftLeft,
             for (int y = 0; y < GRID_H; y++) {
                 if (m_arlinesToRemove[y]) {
                     scrollEverythingDown(y);
+                    m_icountLines++;
+                    if (m_icountLines % 2 == 0) {
+                        m_ilevel++;
+                        m_ftimeMultiplier = getNextLevelMultiplier();
+                    }
                 }
             }
 
+            printf(
+              ">>>>>%d %d = %f\n", m_ilevel, m_icountLines, m_ftimeMultiplier);
+
             m_soundExplode.play();
-            m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER;
+            // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
+            m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_egameState = scrollDown;
-            m_boolOnceLineSound = false;
+            m_boolonceLineSound = false;
         }
     }
 
     if (m_egameState == gameOver) {
         youLoose();
+        // m_egameState = none;
     }
 
     if (framesCount == frameRate * 1000) {
         framesCount = 0;
+    }
+}
+
+void
+Board::checkKeyboard()
+{
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
+        m_keyLatencyClock.getElapsedTime().asMilliseconds() >=
+          REPEAT_KEYBOARD_LATENCY_MS &&
+        m_egameState != none) {
+        left();
+        m_keyLatencyClock.restart();
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
+        m_keyLatencyClock.getElapsedTime().asMilliseconds() >=
+          REPEAT_KEYBOARD_LATENCY_MS &&
+        m_egameState != none) {
+        right();
+        m_keyLatencyClock.restart();
+    }
+
+    if (m_boolshouldRotate && sf::Keyboard::isKeyPressed(sf::Keyboard::Up) &&
+        m_egameState != none) {
+        rotate();
+        m_boolshouldRotate = false;
+    }
+
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && !m_boolshouldRotate &&
+        m_egameState != none) {
+        m_boolshouldRotate = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && m_boolCanAccelerate &&
+        m_egameState != none) {
+        accelerate();
+        downSpecifics();
+    }
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
+        !m_boolCanAccelerate && m_egameState != none) {
+        m_boolCanAccelerate = true;
+    }
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
+        m_egameState != none) {
+        normalSpeed();
+    }
+
+    if (m_boolshouldWarp &&
+        sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
+        m_egameState != none) {
+        warp();
+        m_boolshouldWarp = false;
+    }
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
+        !m_boolshouldWarp && m_egameState != none) {
+        m_boolshouldWarp = true;
     }
 }
 
@@ -506,17 +577,7 @@ Board::scrollEverythingDown(int fromLine)
 {
     for (int y = fromLine - 1; y >= 0; y--) {
         for (int x = 0; x < GRID_W; x++) {
-            // if (m_argrid[y][x] != SHAPE_IN_SQUARE) {
-            //     m_argrid[y + 1][x] = m_argrid[y][x];
-            // }
-
-            // if (m_argrid[y][x] == SOMETHING_IN_SQUARE ||
-            //     m_argrid[y][x] == NOTHING_IN_SQUARE) {
-            //     m_argrid[y + 1][x] = m_argrid[y][x];
-            // }
-            // if (m_argrid[y][x] != SHAPE_IN_SQUARE) {
             m_argrid[y + 1][x] = m_argrid[y][x];
-            //}
         }
     }
 }
@@ -575,7 +636,9 @@ Board::accelerate()
 void
 Board::normalSpeed()
 {
-    m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER;
+    // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
+    // m_ftimeMultiplier = getNextLevelMultiplier();
+    m_ftimeMultiplier = getCurrentLevelMultiplier();
 }
 
 void
@@ -604,7 +667,8 @@ Board::warp()
         m_particles.addParticles(
           m_currentShiftLeft + shapeRect.x * PIXEL_SQUARE_SIZE,
           m_currentShiftHeight + shapeRect.y * PIXEL_SQUARE_SIZE,
-          2, 2);
+          2,
+          2);
     }
 
     if (checkIfCurrentBottomShiftShapeCollide() ||
@@ -615,7 +679,9 @@ Board::warp()
 
     setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
     findCurrentBottomShiftShape();
-    m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER;
+    // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
+    // m_ftimeMultiplier = getNextLevelMultiplier();
+    m_ftimeMultiplier = getCurrentLevelMultiplier();
     m_boolAllowedTimeStarted = false;
     m_boolCanAccelerate = false;
 }
@@ -803,7 +869,9 @@ Board::downSpecifics()
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
-            m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER;
+            // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
+            // m_ftimeMultiplier = getNextLevelMultiplier();
+            m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_boolAllowedTimeStarted = false;
             m_boolCanAccelerate = false;
         }
@@ -835,4 +903,24 @@ Board::locateCurrentShape()
     }
     tt::rect rect = { xmin, ymin, xmax - xmin + 1, ymax - ymin + 1 };
     return rect;
+}
+
+float
+Board::getNextLevelMultiplier()
+{
+    // 0,03 step = 28 levels
+    float mult = (float)(1 - 0.03 * m_ilevel);
+    if (mult <= 0.04f) {
+        printf("TOP LEVEL\n");
+        mult = 0.04f;
+    }
+
+    m_soundHurry.play();
+    return mult;
+}
+
+float
+Board::getCurrentLevelMultiplier()
+{
+    return (float)(1 - 0.03 * m_ilevel);
 }

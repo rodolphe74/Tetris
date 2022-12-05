@@ -6,13 +6,13 @@ AudioStream::onGetData(Chunk& data)
     // set the pointer to the next audio samples to be played
     data.samples = &m_samples[m_currentSample];
 
-    computePeakAmp();
-
     // have we reached the end of the sound?
     if (m_currentSample + SAMPLES_TO_STREAM <= m_samples.size()) {
         // end not reached: stream the samples and continue
         data.sampleCount = SAMPLES_TO_STREAM;
         m_currentSample += SAMPLES_TO_STREAM;
+
+        computePeakAmp((int) data.sampleCount);
 
         return true;
     } else {
@@ -20,6 +20,8 @@ AudioStream::onGetData(Chunk& data)
         // playback
         data.sampleCount = m_samples.size() - m_currentSample;
         m_currentSample = m_samples.size();
+
+        computePeakAmp((int) data.sampleCount);
 
         return false;
     }
@@ -49,15 +51,15 @@ AudioStream::load(sf::SoundBuffer& buffer)
 }
 
 void
-AudioStream::computePeakAmp()
+AudioStream::computePeakAmp(int sampleCounts)
 {
     float meanAmpTotal = 0.f;
-    for (int i = 0; i < SAMPLES_TO_STREAM; i++) {
-        if (i < m_samples.size() &&
-            abs(m_samples[m_currentSample] > meanAmpTotal)) {
-            m_fpeakAmp = m_samples[m_currentSample];
-        }
-    }
+    //for (int i = 0; i < sampleCounts; i++) {
+    //    if (i < m_samples.size() && m_currentSample < m_samples.size() &&
+    //        abs(m_samples[m_currentSample] > meanAmpTotal)) {
+    //        m_fpeakAmp = m_samples[m_currentSample];
+    //    }
+    //}
 }
 
 void

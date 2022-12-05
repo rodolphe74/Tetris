@@ -5,46 +5,100 @@
 void
 playThemeOne()
 {
+    AudioStream audioStream;
     audioStream.load(soundBufferMainOne);
     audioStream.play();
-    while (audioStream.isPlaying && audioStream.getStatus() == AudioStream::Playing) {
-        sf::sleep(sf::seconds(0.2f));
+    currentPlayingTheme = 1;
+    while (currentPlayingTheme == 1 &&
+           audioStream.getStatus() == AudioStream::Playing) {
+        sf::sleep(sf::seconds(0.1f));
+        background->m_unPeuDeRhythme = audioStream.m_fpeakAmp;
     }
 }
 
 void
 playThemeTwo()
 {
+    AudioStream audioStream;
     audioStream.load(soundBufferMainTwo);
     audioStream.play();
-    while (audioStream.isPlaying && audioStream.getStatus() == AudioStream::Playing) {
-        sf::sleep(sf::seconds(0.2f));
+    currentPlayingTheme = 2;
+    while (currentPlayingTheme == 2 &&
+           audioStream.getStatus() == AudioStream::Playing) {
+        sf::sleep(sf::seconds(0.1f));
+        background->m_unPeuDeRhythme = audioStream.m_fpeakAmp;
     }
 }
 
+void
+playThemeThree()
+{
+    AudioStream audioStream;
+    audioStream.load(soundBufferMainThree);
+    audioStream.play();
+    currentPlayingTheme = 3;
+    while (currentPlayingTheme == 3 &&
+           audioStream.getStatus() == AudioStream::Playing) {
+        sf::sleep(sf::seconds(0.1f));
+        background->m_unPeuDeRhythme = audioStream.m_fpeakAmp;
+    }
+}
 
 void
-redrawBoard(sf::RenderWindow& window,
-            Board& board,
-            Particles& particles,
-            int& countFrames)
+stopCurrentAudioStream()
 {
-    window.pushGLStates();
+    if (currentPlayingTheme > 0) {
+        currentPlayingTheme = -1;
+    }
+}
 
-    board.render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
-                 WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
-                 countFrames,
-                 FRAME_RATE);
+void
+gameIntro()
+{
+    counter = 4;
+    soundReady.play();
+    sf::sleep(sf::milliseconds(800));
 
-    window.popGLStates();
-    window.display();
+    counter = 3;
+    soundThree.play();
+    sf::sleep(sf::milliseconds(800));
+
+    counter = 2;
+    soundTwo.play();
+    sf::sleep(sf::milliseconds(800));
+
+    counter = 1;
+    soundOne.play();
+    sf::sleep(sf::milliseconds(800));
+
+    counter = 0;
+    soundGo.play();
+    sf::sleep(sf::milliseconds(800));
+
+    counter = -1;
 }
 
 void
 init()
 {
-    soundBufferMainOne.loadFromFile("tetris99main.ogg");
-    soundBufferMainTwo.loadFromFile("tetris99main2.ogg");
+    if (!gameFont.loadFromFile("resources/Brick3DRegular-nRJR4.ttf")) {
+        perror("can't load font");
+    }
+
+    soundBufferMainOne.loadFromFile("resources/tetris99main.ogg");
+    soundBufferMainTwo.loadFromFile("resources/tetris99main2.ogg");
+    soundBufferMainThree.loadFromFile("resources/TDrift.ogg");
+
+    soundBufferOne.loadFromFile("resources/one.ogg");
+    soundOne.setBuffer(soundBufferOne);
+    soundBufferTwo.loadFromFile("resources/two.ogg");
+    soundTwo.setBuffer(soundBufferTwo);
+    soundBufferThree.loadFromFile("resources/three.ogg");
+    soundThree.setBuffer(soundBufferThree);
+    soundBufferGo.loadFromFile("resources/ready.ogg");
+    soundReady.setBuffer(soundBufferGo);
+    soundBufferReady.loadFromFile("resources/go.ogg");
+    soundGo.setBuffer(soundBufferReady);
 
     contextSettings.antialiasingLevel = 8;
     contextSettings.depthBits = 24;
@@ -69,13 +123,23 @@ init()
     board->normalSpeed();
 
     background = new AnimatedBackground(*window);
+
+    menu = new Menu(*window);
+    menu->addItem({ "New game", 1, sf::Keyboard::F1 });
+    menu->addItem({ "Exit", 3, sf::Keyboard::F2 });
 }
 
 void
 freeAndExit()
 {
-    audioStream.stop();
-    delete musicThread;
+    stopCurrentAudioStream();
+    if (introThread != NULL)
+        delete introThread;
+
+    if (musicThread != NULL)
+        delete musicThread;
+
+    delete menu;
     delete background;
     delete board;
     delete window;
@@ -91,13 +155,19 @@ main()
       (int)std::time(nullptr)); // use current time as seed for random generator
     int randomModel = std::rand() % models.size();
     int randomMaterial = std::rand() % materials.size();
-    bool shouldRotate = 0;
-    bool shouldWarp = 0;
 
-    musicThread = new sf::Thread(&playThemeOne);
-    musicThread->launch();
+    // DEBUG MENU
+    int item = NO_ITEM_SELECTED;
+    int mode = 0;
+
+    // Start game
+    if (gameMode == MENU) {
+        musicThread = new sf::Thread(&playThemeThree);
+        musicThread->launch();
+    }
 
     while (window->isOpen()) {
+
         while (window->pollEvent(event)) {
             switch (event.type) {
 
@@ -112,6 +182,7 @@ main()
                     if (event.key.code == sf::Keyboard::Left ||
                         event.key.code == sf::Keyboard::Right)
                         board->m_boolOnceMoveSound = true;
+                    menu->m_boolcanSound = true;
                     break;
 
                 case sf::Event::Resized:
@@ -123,63 +194,83 @@ main()
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
-            keyLatencyClock.getElapsedTime().asMilliseconds() >=
-              REPEAT_KEYBOARD_LATENCY_MS &&
-            board->m_egameState != none) {
-            board->left();
-            keyLatencyClock.restart();
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
-            keyLatencyClock.getElapsedTime().asMilliseconds() >=
-              REPEAT_KEYBOARD_LATENCY_MS &&
-            board->m_egameState != none) {
-            board->right();
-            keyLatencyClock.restart();
-        }
-
-        if (shouldRotate && sf::Keyboard::isKeyPressed(sf::Keyboard::Up) &&
-            board->m_egameState != none) {
-            board->rotate();
-            shouldRotate = false;
-        }
-
-        if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && !shouldRotate &&
-            board->m_egameState != none) {
-            shouldRotate = true;
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
-            board->m_boolCanAccelerate && board->m_egameState != none) {
-            board->accelerate();
-            board->downSpecifics();
-        }
-        if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
-            !board->m_boolCanAccelerate && board->m_egameState != none) {
-            board->m_boolCanAccelerate = true;
-        }
-        if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
-            board->m_egameState != none) {
-            board->normalSpeed();
-        }
-
-        if (shouldWarp && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
-            board->m_egameState != none) {
-            board->warp();
-            shouldWarp = false;
-        }
-        if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
-            !shouldWarp && board->m_egameState != none) {
-            shouldWarp = true;
-        }
-
-        background->m_unPeuDeRhythme = audioStream.m_fpeakAmp;
         background->renderBackground(models.at(randomModel) + 1,
                                      (const size_t)models.at(randomModel)[0],
                                      materials.at(randomMaterial));
 
-        redrawBoard(*window, *board, particles, countFrames);
+        // draw menu or board
+        window->pushGLStates();
+
+        if (gameMode == MENU) {
+            item = menu->checkKeyboard();
+            if (item == 1) {
+                gameMode = NEW_GAME;
+                stopCurrentAudioStream();
+                delete musicThread;
+                musicThread = NULL;
+                introThread = new sf::Thread(&gameIntro);
+                introThread->launch();
+                newGameAnimWait.restart();
+            } else if (item == 3) {
+                gameMode = EXIT;
+            }
+            menu->render();
+        }
+
+        if (gameMode == GAME) {
+            board->checkKeyboard();
+            board->render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                          WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                          countFrames,
+                          FRAME_RATE);
+        }
+
+        if (gameMode == NEW_GAME) {
+            board->m_egameState = none;
+            board->render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                          WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                          countFrames,
+                          FRAME_RATE);
+
+            sf::Text t;
+            t.setFont(gameFont);
+            t.setCharacterSize(48);
+            if (counter == 4) {
+                t.setString("Ready");
+            } else if (counter == 3) {
+                t.setString("3");
+            } else if (counter == 2) {
+                t.setString("2");
+            } else if (counter == 1) {
+                t.setString("1");
+            } else if (counter == 0) {
+                t.setString("Go !");
+            }
+            if (counter != -1) {
+                sf::FloatRect rect = t.getLocalBounds();
+                t.setPosition(WINDOW_W / 2 - rect.width / 2, WINDOW_H / 2 - rect.height / 2);
+                t.setFillColor(sf::Color::White);
+                window->draw(t);
+            }
+
+            // Wait READY 3 2 1 GO before going into game mode
+            printf("%d\n", newGameAnimWait.getElapsedTime().asMilliseconds());
+            if (newGameAnimWait.getElapsedTime().asMilliseconds() >= 4000) {
+                delete introThread;
+                introThread = NULL;
+                musicThread = new sf::Thread(&playThemeOne);
+                musicThread->launch();
+                board->m_egameState = scrollDown;
+                gameMode = GAME;
+            }
+        }
+
+        if (gameMode == EXIT) {
+            break;
+        }
+
+        window->display();
+        window->popGLStates();
 
         countFrames++;
     }

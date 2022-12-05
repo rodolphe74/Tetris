@@ -17,7 +17,7 @@ Particles::Particles()
     }
     maxIndex = 0;
 
-    if (!m_asterTexture.loadFromFile("asterw.png")) {
+    if (!m_asterTexture.loadFromFile("resources/asterw.png")) {
         perror("can't load texture");
     }
     m_asterTexture.setSmooth(true);
