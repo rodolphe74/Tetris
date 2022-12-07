@@ -1,5 +1,6 @@
 #include "board.h"
 #include "shapes.h"
+#include <string>
 
 // Static members
 sf::SoundBuffer Board::m_soundBufferMainTwo;
@@ -158,13 +159,16 @@ Board::render(float shiftLeft,
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
-            // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
-            // m_ftimeMultiplier = getNextLevelMultiplier();
             m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_boolAllowedTimeStarted = false;
             m_boolCanAccelerate = false;
+            m_iscore += 7;
+            m_strscore = std::to_string(m_iscore);
         }
     }
+
+    // Draw score
+    drawScore();
 
     // Draw level
     drawLevel();
@@ -263,21 +267,35 @@ Board::render(float shiftLeft,
         }
 
         //  Wait a bit before scrolling lines down
+        int countScrolledDown = 0;
         if (m_waitClock.getElapsedTime().asMilliseconds() >
             WAIT_BEFORE_SCROLLING_DOWN_MS) {
             for (int y = 0; y < GRID_H; y++) {
                 if (m_arlinesToRemove[y]) {
                     scrollEverythingDown(y);
+                    countScrolledDown++;
                     m_icountLines++;
                     m_icountLinesPerLevel++;
+                    m_strcountLines = std::to_string(m_icountLines);
                     m_boolparticlesLevel = true;
                     if (m_icountLinesPerLevel > LINES_PER_LEVEL) {
                         m_ilevel++;
                         m_ftimeMultiplier = getNextLevelMultiplier();
                         m_icountLinesPerLevel = 0;
+                        m_strlevel = std::to_string(m_ilevel);
                     }
                 }
             }
+            if (countScrolledDown == 1) {
+                m_iscore += m_ilevel * 100;
+            } else if (countScrolledDown == 2) {
+                m_iscore += m_ilevel * 300;
+            } else if (countScrolledDown == 3) {
+                m_iscore += m_ilevel * 500;
+            } else if (countScrolledDown == 4) {
+                m_iscore += m_ilevel * 800;
+            }
+            m_strscore = std::to_string(m_iscore);
 
             printf(">>>>>%d %d %d = %f\n",
                    m_ilevel,
@@ -692,6 +710,8 @@ Board::warp()
 
     if (checkIfCurrentBottomShiftShapeCollide() ||
         (m_currentShapeRow >= GRID_H - m_currentBottomShiftShape - 1)) {
+        m_iscore += 9;
+        m_strscore = std::to_string(m_iscore);
         freezeCurrentShape();
         removesFullLines();
     }
@@ -809,11 +829,40 @@ Board::drawLevel()
                  (m_icountLinesPerLevel) * (float)heightIncrement);
         m_particles.addParticles(LEVEL_SHIFT_LEFT,
                                  LEVEL_SHIFT_HEIGHT -
-                                   (m_icountLinesPerLevel + 1) * (float)heightIncrement,
+                                   (m_icountLinesPerLevel + 1) *
+                                     (float)heightIncrement,
                                  30,
                                  3);
         m_boolparticlesLevel = false;
     }
+}
+
+void
+Board::drawScore()
+{
+    sf::Text scoreText(m_strscore, m_gameFont, SCORE_FONT_SIZE);
+    float scoreWidth = scoreText.getLocalBounds().width;
+    scoreText.setFillColor(sf::Color::Black);
+    scoreText.setOutlineColor(sf::Color::White);
+    scoreText.setOutlineThickness(0.8f);
+    scoreText.setPosition(SCORE_SHIFT_LEFT - scoreWidth, SCORE_SHIFT_HEIGHT);
+    m_prenderWindow->draw(scoreText);
+
+    sf::Text lineText(m_strcountLines, m_gameFont, LINE_FONT_SIZE);
+    float lineWidth = lineText.getLocalBounds().width;
+    lineText.setFillColor(sf::Color::Black);
+    lineText.setOutlineColor(sf::Color::White);
+    lineText.setOutlineThickness(0.8f);
+    lineText.setPosition(LINE_SHIFT_LEFT - lineWidth, LINE_SHIFT_HEIGHT);
+    m_prenderWindow->draw(lineText);
+
+    sf::Text levelText(m_strlevel, m_gameFont, LEVELF_FONT_SIZE);
+    float levelWidth = levelText.getLocalBounds().width;
+    levelText.setFillColor(sf::Color::Black);
+    levelText.setOutlineColor(sf::Color::White);
+    levelText.setOutlineThickness(0.8f);
+    levelText.setPosition(LEVELF_SHIFT_LEFT - levelWidth, LEVELF_SHIFT_HEIGHT);
+    m_prenderWindow->draw(levelText);
 }
 
 void
@@ -909,6 +958,8 @@ Board::downSpecifics()
     if (m_boolAllowedTimeStarted) {
         if (checkIfCurrentBottomShiftShapeCollide() ||
             (m_currentShapeRow >= GRID_H - m_currentBottomShiftShape - 1)) {
+            m_iscore += 8;
+            m_strscore = std::to_string(m_iscore);
 
             freezeCurrentShape();
             removesFullLines();

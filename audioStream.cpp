@@ -12,8 +12,8 @@ AudioStream::onGetData(Chunk& data)
         data.sampleCount = SAMPLES_TO_STREAM;
         m_currentSample += SAMPLES_TO_STREAM;
 
-        if (isPlaying)
-            computePeakAmp((int)data.sampleCount);
+        //if (isPlaying)
+        //    computePeakAmp((int)data.sampleCount);
 
         return true;
     } else {
@@ -22,8 +22,8 @@ AudioStream::onGetData(Chunk& data)
         data.sampleCount = m_samples.size() - m_currentSample;
         m_currentSample = m_samples.size();
 
-        if (isPlaying)
-            computePeakAmp((int)data.sampleCount);
+        //if (isPlaying)
+        //    computePeakAmp((int)data.sampleCount);
 
         return false;
     }

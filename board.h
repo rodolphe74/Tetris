@@ -80,12 +80,17 @@ class Board
     bool m_boolshouldRotate = 0;
     bool m_boolshouldWarp = 0;
     bool m_boolparticlesLevel = false;
-    int m_ilevel = 0;
     int m_icountLines = 0;
     int m_icountLinesPerLevel = 0;
+    int m_iscore = 0;
+
+    std::string m_strscore = "0";
+    std::string m_strcountLines = "0";
+    std::string m_strlevel = "1";
 
   public:
     GameState m_egameState = none;
+    int m_ilevel = 1;
     bool m_boolOnceMoveSound = true;
     bool m_boolAllowedTimeStarted = false;
     bool m_boolCanAccelerate = true;
@@ -245,6 +250,7 @@ class Board
     int getNextShape();
     void drawNextShapes();
     void drawLevel();
+    void drawScore();
     void updateGhost();
     void youLoose();
     void playIntro();

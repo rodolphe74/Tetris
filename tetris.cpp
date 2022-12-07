@@ -199,9 +199,15 @@ main()
             }
         }
 
-        background->renderBackground(models.at(randomModel) + 1,
-                                     (const size_t)models.at(randomModel)[0],
-                                     materials.at(randomMaterial));
+        // background->renderBackground(models.at(randomModel) + 1,
+        //                              (const size_t)models.at(randomModel)[0],
+        //                              materials.at(randomMaterial));
+
+        int model = board->m_ilevel % models.size();
+        int material = board->m_ilevel % materials.size();
+        background->renderBackground(models.at(model) + 1,
+                                     (const size_t)models.at(model)[0],
+                                     materials.at(material));
 
         // draw menu or board
         window->pushGLStates();
@@ -253,7 +259,8 @@ main()
             }
             if (counter != -1) {
                 sf::FloatRect rect = t.getLocalBounds();
-                t.setPosition(WINDOW_W / 2 - rect.width / 2, WINDOW_H / 2 - rect.height / 2);
+                t.setPosition(WINDOW_W / 2 - rect.width / 2,
+                              WINDOW_H / 2 - rect.height / 2);
                 t.setFillColor(sf::Color::White);
                 window->draw(t);
             }

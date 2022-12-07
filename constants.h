@@ -36,5 +36,19 @@ constexpr int LINES_PER_LEVEL = 10;
 constexpr int LEVEL_HEIGHT = 347;
 constexpr int LEVEL_WIDTH = 10;
 
+constexpr int SCORE_SHIFT_LEFT = 588;
+constexpr int SCORE_SHIFT_HEIGHT = 390;
+constexpr int SCORE_FONT_SIZE = 15;
+
+constexpr int LINE_SHIFT_LEFT = 588;
+constexpr int LINE_SHIFT_HEIGHT = 436;
+constexpr int LINE_FONT_SIZE = 20;
+
+constexpr int LEVELF_SHIFT_LEFT = 588;
+constexpr int LEVELF_SHIFT_HEIGHT = 486;
+constexpr int LEVELF_FONT_SIZE = 24;
+
+
+
 constexpr float QUICK_TIME_MULTIPLIER = 0.08f;
 constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;

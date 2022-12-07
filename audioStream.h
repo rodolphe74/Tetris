@@ -10,7 +10,7 @@ class AudioStream : public sf::SoundStream
     // number of samples to stream every time the function is called;
     // in a more robust implementation, it should be a fixed
     // amount of time rather than an arbitrary number of samples
-    const int SAMPLES_TO_STREAM = 4096;
+    const int SAMPLES_TO_STREAM = 8192;
     
     std::vector<sf::Int16> m_samples;
     virtual bool onGetData(Chunk& data);
