@@ -32,6 +32,16 @@ Board::renderSmallSquare(const tt::rect& squareRect, const sf::Color& color)
     m_prenderWindow->draw(m_smallSquareSprite);
 }
 
+void
+Board::renderMediumSquare(const tt::rect& squareRect, const sf::Color& color)
+{
+    m_mediumSquareSprite.setColor(color);
+
+    m_mediumSquareSprite.setPosition(
+      sf::Vector2f((float)squareRect.x, (float)squareRect.y));
+    m_prenderWindow->draw(m_mediumSquareSprite);
+}
+
 bool
 Board::setCurrentShape(int shapeIndex, int row, int col, int rotation)
 {
@@ -156,6 +166,9 @@ Board::render(float shiftLeft,
         }
     }
 
+    // Draw level
+    drawLevel();
+
     // Draw ghost
     updateGhost();
 
@@ -256,15 +269,21 @@ Board::render(float shiftLeft,
                 if (m_arlinesToRemove[y]) {
                     scrollEverythingDown(y);
                     m_icountLines++;
-                    if (m_icountLines % 2 == 0) {
+                    m_icountLinesPerLevel++;
+                    m_boolparticlesLevel = true;
+                    if (m_icountLinesPerLevel > LINES_PER_LEVEL) {
                         m_ilevel++;
                         m_ftimeMultiplier = getNextLevelMultiplier();
+                        m_icountLinesPerLevel = 0;
                     }
                 }
             }
 
-            printf(
-              ">>>>>%d %d = %f\n", m_ilevel, m_icountLines, m_ftimeMultiplier);
+            printf(">>>>>%d %d %d = %f\n",
+                   m_ilevel,
+                   m_icountLines,
+                   m_icountLinesPerLevel,
+                   m_ftimeMultiplier);
 
             m_soundExplode.play();
             // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
@@ -767,6 +786,33 @@ Board::drawNextShapes()
             }
         }
         nextHeight += squareSize * SHAPE_SIZE;
+    }
+}
+
+void
+Board::drawLevel()
+{
+    int heightIncrement = LEVEL_HEIGHT / LINES_PER_LEVEL;
+    for (int i = 0; i < m_icountLinesPerLevel; i++) {
+        sf::RectangleShape rectangle(
+          sf::Vector2f(LEVEL_WIDTH, -(i + 1) * (float)heightIncrement));
+        rectangle.setPosition(
+          sf::Vector2f(LEVEL_SHIFT_LEFT, LEVEL_SHIFT_HEIGHT));
+        rectangle.setFillColor(sf::Color(0, 255, 255, 255 / LINES_PER_LEVEL));
+        rectangle.setOutlineColor(sf::Color(0, 255, 255, 255));
+        rectangle.setOutlineThickness(1);
+        m_prenderWindow->draw(rectangle);
+    }
+    if (m_boolparticlesLevel) {
+        printf("particles level :%f\n",
+               LEVEL_SHIFT_HEIGHT -
+                 (m_icountLinesPerLevel) * (float)heightIncrement);
+        m_particles.addParticles(LEVEL_SHIFT_LEFT,
+                                 LEVEL_SHIFT_HEIGHT -
+                                   (m_icountLinesPerLevel + 1) * (float)heightIncrement,
+                                 30,
+                                 3);
+        m_boolparticlesLevel = false;
     }
 }
 

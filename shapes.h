@@ -19,6 +19,8 @@ const sf::Color gShapesColor[7] = {
 
 const sf::Color gFreezedColor = sf::Color(192, 192, 192, 255);
 const sf::Color gGameOverColor = sf::Color(92, 92, 92, 255);
+const sf::Color gLevelColor = sf::Color(192, 192, 0, 255);
+
 
 const float gRotationCenters[7][4][2] = {
     { { 0.625, 0.625 }, { 0.375, 0.375 }, { 0.625, 0.625 }, { 0.375, 0.375 } },

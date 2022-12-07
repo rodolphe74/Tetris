@@ -31,6 +31,7 @@ class Board
     sf::Texture m_squareTexture;
     sf::Sprite m_squareSprite;
     sf::Sprite m_smallSquareSprite;
+    sf::Sprite m_mediumSquareSprite;
     sf::Texture m_borderTexture;
     sf::Sprite m_borderSprite;
     sf::Font m_gameFont;
@@ -78,8 +79,10 @@ class Board
     bool m_boolonceLineSound = false;
     bool m_boolshouldRotate = 0;
     bool m_boolshouldWarp = 0;
+    bool m_boolparticlesLevel = false;
     int m_ilevel = 0;
     int m_icountLines = 0;
+    int m_icountLinesPerLevel = 0;
 
   public:
     GameState m_egameState = none;
@@ -120,6 +123,13 @@ class Board
         ry = (PIXEL_SQUARE_SIZE / SMALL_SHAPE_REDUCTION_FACTOR) /
              (float)m_squareTexture.getSize().y;
         m_smallSquareSprite.setScale(rx, ry);
+
+        m_mediumSquareSprite.setTexture(m_squareTexture);
+        rx = (PIXEL_SQUARE_SIZE / MEDIUM_SHAPE_REDUCTION_FACTOR) /
+             (float)m_squareTexture.getSize().x;
+        ry = (PIXEL_SQUARE_SIZE / MEDIUM_SHAPE_REDUCTION_FACTOR) /
+             (float)m_squareTexture.getSize().y;
+        m_mediumSquareSprite.setScale(rx, ry);
 
         // load border sprite
         if (!m_borderTexture.loadFromFile("resources/borderb.png")) {
@@ -206,6 +216,7 @@ class Board
                       const sf::Color& color,
                       bool isGhost);
     void renderSmallSquare(const tt::rect& squareRect, const sf::Color& color);
+    void renderMediumSquare(const tt::rect& squareRect, const sf::Color& color);
     bool setCurrentShape(int shapeIndex, int row, int col, int currentRotation);
     void render(float shiftLeft,
                 float shiftHeight,
@@ -233,6 +244,7 @@ class Board
     void rotate();
     int getNextShape();
     void drawNextShapes();
+    void drawLevel();
     void updateGhost();
     void youLoose();
     void playIntro();

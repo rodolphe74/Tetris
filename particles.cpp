@@ -52,6 +52,10 @@ Particles::addParticles(float x, float y, int count, int colorScheme)
         sparkColors[0] = sf::Color(255, 255, 255);
         sparkColors[1] = sf::Color(192, 192, 192);
         sparkColors[2] = sf::Color(128, 128, 128);
+    } else if (colorScheme == 3) {
+        sparkColors[0] = sf::Color(72, 151, 193);
+        sparkColors[1] = sf::Color(95, 69, 214);
+        sparkColors[2] = sf::Color(42, 31, 169);
     }
 
     for (int i = maxIndex; i < maxIndex + count; i++) {

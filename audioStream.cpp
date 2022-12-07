@@ -12,7 +12,8 @@ AudioStream::onGetData(Chunk& data)
         data.sampleCount = SAMPLES_TO_STREAM;
         m_currentSample += SAMPLES_TO_STREAM;
 
-        computePeakAmp((int) data.sampleCount);
+        if (isPlaying)
+            computePeakAmp((int)data.sampleCount);
 
         return true;
     } else {
@@ -21,7 +22,8 @@ AudioStream::onGetData(Chunk& data)
         data.sampleCount = m_samples.size() - m_currentSample;
         m_currentSample = m_samples.size();
 
-        computePeakAmp((int) data.sampleCount);
+        if (isPlaying)
+            computePeakAmp((int)data.sampleCount);
 
         return false;
     }
@@ -54,12 +56,12 @@ void
 AudioStream::computePeakAmp(int sampleCounts)
 {
     float meanAmpTotal = 0.f;
-    //for (int i = 0; i < sampleCounts; i++) {
-    //    if (i < m_samples.size() && m_currentSample < m_samples.size() &&
-    //        abs(m_samples[m_currentSample] > meanAmpTotal)) {
-    //        m_fpeakAmp = m_samples[m_currentSample];
-    //    }
-    //}
+    for (int i = 0; i < sampleCounts; i++) {
+        if (i < m_samples.size() && m_currentSample < m_samples.size() &&
+            abs(m_samples[m_currentSample] > meanAmpTotal)) {
+            m_fpeakAmp = m_samples[m_currentSample];
+        }
+    }
 }
 
 void

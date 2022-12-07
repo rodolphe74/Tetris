@@ -9,6 +9,7 @@ playThemeOne()
     audioStream.load(soundBufferMainOne);
     audioStream.play();
     currentPlayingTheme = 1;
+    audioStream.isPlaying = true;
     while (currentPlayingTheme == 1 &&
            audioStream.getStatus() == AudioStream::Playing) {
         sf::sleep(sf::seconds(0.1f));
@@ -23,11 +24,13 @@ playThemeTwo()
     audioStream.load(soundBufferMainTwo);
     audioStream.play();
     currentPlayingTheme = 2;
+    audioStream.isPlaying = true;
     while (currentPlayingTheme == 2 &&
            audioStream.getStatus() == AudioStream::Playing) {
         sf::sleep(sf::seconds(0.1f));
         background->m_unPeuDeRhythme = audioStream.m_fpeakAmp;
     }
+    audioStream.isPlaying = false;
 }
 
 void
@@ -37,11 +40,13 @@ playThemeThree()
     audioStream.load(soundBufferMainThree);
     audioStream.play();
     currentPlayingTheme = 3;
+    audioStream.isPlaying = true;
     while (currentPlayingTheme == 3 &&
            audioStream.getStatus() == AudioStream::Playing) {
         sf::sleep(sf::seconds(0.1f));
         background->m_unPeuDeRhythme = audioStream.m_fpeakAmp;
     }
+    audioStream.isPlaying = false;
 }
 
 void

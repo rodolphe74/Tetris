@@ -19,6 +19,7 @@
 #define WAIT_BEFORE_SCROLLING_DOWN_MS 250
 #define LINE_TIME_MS 100
 #define STICKY_TIME_MS 1000
+
 constexpr float BORDER_W_MULT = 1.70f;
 constexpr float BORDER_H_MULT = 1.03f;
 constexpr float BORDER_SHIFT_LEFT = 192.0f;
@@ -27,6 +28,13 @@ constexpr float BORDER_SHIFT_HEIGHT = 53.0f;
 constexpr int NEXT_SHAPES_SHIFT_LEFT = 546;
 constexpr int NEXT_SHAPES_SHIFT_HEIGHT = 99;
 constexpr float SMALL_SHAPE_REDUCTION_FACTOR = 2.6f;
+constexpr float MEDIUM_SHAPE_REDUCTION_FACTOR = 2.0f;
+
+constexpr int LEVEL_SHIFT_LEFT = 247;
+constexpr int LEVEL_SHIFT_HEIGHT = 530;
+constexpr int LINES_PER_LEVEL = 10;
+constexpr int LEVEL_HEIGHT = 347;
+constexpr int LEVEL_WIDTH = 10;
 
 constexpr float QUICK_TIME_MULTIPLIER = 0.08f;
 constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;
