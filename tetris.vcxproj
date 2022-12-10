@@ -116,8 +116,7 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message></Message>
       <Command>setlocal
 "C:\Program Files\PowerShell\7\pwsh.exe" -noprofile -executionpolicy Bypass -file C:/Users/rodoc/HOME/developpement/visual/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/rodoc/HOME/developpement/visual/Tetris/Debug/tetris.exe -installedDir C:/Users/rodoc/HOME/developpement/visual/vcpkg/installed/x64-windows/debug/bin -OutVariable out
 if %errorlevel% neq 0 goto :cmEnd
@@ -173,8 +172,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message></Message>
       <Command>setlocal
 "C:\Program Files\PowerShell\7\pwsh.exe" -noprofile -executionpolicy Bypass -file C:/Users/rodoc/HOME/developpement/visual/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/rodoc/HOME/developpement/visual/Tetris/Release/tetris.exe -installedDir C:/Users/rodoc/HOME/developpement/visual/vcpkg/installed/x64-windows/bin -OutVariable out
 if %errorlevel% neq 0 goto :cmEnd
@@ -230,8 +228,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message></Message>
       <Command>setlocal
 "C:\Program Files\PowerShell\7\pwsh.exe" -noprofile -executionpolicy Bypass -file C:/Users/rodoc/HOME/developpement/visual/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/rodoc/HOME/developpement/visual/Tetris/MinSizeRel/tetris.exe -installedDir C:/Users/rodoc/HOME/developpement/visual/vcpkg/installed/x64-windows/bin -OutVariable out
 if %errorlevel% neq 0 goto :cmEnd
@@ -286,8 +283,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message></Message>
       <Command>setlocal
 "C:\Program Files\PowerShell\7\pwsh.exe" -noprofile -executionpolicy Bypass -file C:/Users/rodoc/HOME/developpement/visual/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/rodoc/HOME/developpement/visual/Tetris/RelWithDebInfo/tetris.exe -installedDir C:/Users/rodoc/HOME/developpement/visual/vcpkg/installed/x64-windows/bin -OutVariable out
 if %errorlevel% neq 0 goto :cmEnd
@@ -386,9 +382,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="globals.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
