@@ -19,6 +19,7 @@
 #define WAIT_BEFORE_SCROLLING_DOWN_MS 250
 #define LINE_TIME_MS 100
 #define STICKY_TIME_MS 1000
+#define SHAPES_QUEUE_SIZE 6
 
 constexpr float BORDER_W_MULT = 1.70f;
 constexpr float BORDER_H_MULT = 1.03f;
@@ -52,3 +53,5 @@ constexpr int LEVELF_FONT_SIZE = 24;
 
 constexpr float QUICK_TIME_MULTIPLIER = 0.08f;
 constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;
+
+

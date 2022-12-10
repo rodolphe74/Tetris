@@ -1,4 +1,6 @@
 #include "board.h"
+#include "globals.h"
+#include "ia.h"
 #include "shapes.h"
 #include <string>
 
@@ -121,23 +123,23 @@ Board::render(float shiftLeft,
         if (!m_boolAllowedTimeStarted) {
             m_boolAllowedTimeStarted = true;
             m_allowedTimeToMoveAwayClock.restart();
-            printf("Tu peux encore bouger ...\n");
+            // printf("Tu peux encore bouger ...\n");
         }
 
         else if (m_allowedTimeToMoveAwayClock.getElapsedTime()
                    .asMilliseconds() > STICKY_TIME_MS) {
-            printf("Tu peux plus bouger !\n");
+            // printf("Tu peux plus bouger !\n");
             freezeCurrentShape();
             bool linesRemoved = removesFullLines();
-            printf("linesRemoved:%d\n", linesRemoved);
+            // printf("linesRemoved:%d\n", linesRemoved);
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
-            // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
-            // m_ftimeMultiplier = getNextLevelMultiplier();
             m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_boolAllowedTimeStarted = false;
             m_boolCanAccelerate = false;
+            m_iscore += 7;
+            m_strscore = std::to_string(m_iscore);
         }
     }
 
@@ -148,14 +150,14 @@ Board::render(float shiftLeft,
         if (!m_boolAllowedTimeStarted) {
             m_boolAllowedTimeStarted = true;
             m_allowedTimeToMoveAwayClock.restart();
-            printf("Tu peux encore bouger ...\n");
+            // printf("Tu peux encore bouger ...\n");
         } else if (m_allowedTimeToMoveAwayClock.getElapsedTime()
                      .asMilliseconds() > STICKY_TIME_MS) {
 
-            printf("Tu peux plus bouger !\n");
+            // printf("Tu peux plus bouger !\n");
             freezeCurrentShape();
             bool linesRemoved = removesFullLines();
-            printf("linesRemoved:%d\n", linesRemoved);
+            // printf("linesRemoved:%d\n", linesRemoved);
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
@@ -297,11 +299,11 @@ Board::render(float shiftLeft,
             }
             m_strscore = std::to_string(m_iscore);
 
-            printf(">>>>>%d %d %d = %f\n",
-                   m_ilevel,
-                   m_icountLines,
-                   m_icountLinesPerLevel,
-                   m_ftimeMultiplier);
+            // printf(">>>>>%d %d %d = %f\n",
+            //        m_ilevel,
+            //        m_icountLines,
+            //        m_icountLinesPerLevel,
+            //        m_ftimeMultiplier);
 
             m_soundExplode.play();
             // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
@@ -374,6 +376,69 @@ Board::checkKeyboard()
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
         !m_boolshouldWarp && m_egameState != none) {
         m_boolshouldWarp = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) && !m_boolshouldIa) {
+        printf("IA\n");
+
+        int updatedGrid[GRID_H][GRID_W] = { 0 };
+
+        Pos posIa = Ia::findBestPosition(m_argrid,
+                                         m_ishapesQueue,
+                                         m_currentShape,
+                                         m_currentShapeRotation,
+                                         m_currentBottomShiftShape,
+                                         m_currentLeftShiftShape,
+                                         m_currentRightShiftShape,
+                                         m_currentShapeRow,
+                                         m_currentShapeCol);
+
+        int leftCount = m_currentShapeCol - posIa.col;
+        int rightCount = posIa.col - m_currentShapeCol;
+        int rotateCount = abs(posIa.rotation - m_currentShapeRotation) % 4;
+        printf("left:%d  right:%d   rotate:%d\n",
+               leftCount,
+               rightCount,
+               rotateCount);
+        if (rotateCount > 0) {
+            for (int i = 0; i < rotateCount; i++)
+                rotate();
+        }
+        if (rightCount > 0) {
+            for (int i = 0; i < rightCount; i++)
+                right();
+        } else if (leftCount > 0) {
+            for (int i = 0; i < leftCount; i++)
+                left();
+        }
+
+        // int i = 0;
+        // for (int y = posIa.row; y < posIa.row + SHAPE_SIZE; y++) {
+        //     for (int x = posIa.col; x < posIa.col + SHAPE_SIZE; x++) {
+        //         printf("%d-", i);
+        //         if (y < GRID_H && x < GRID_W) {
+        //             int v = tt::gShapesArray[m_currentShape]
+        //                                     [posIa.rotation][i];
+        //             if (v)
+        //                 m_argrid[y][x] = SOMETHING_IN_SQUARE;
+        //         }
+        //         i++;
+        //     }
+        // }
+        // clearCurrentShape();
+        // removesFullLines();
+        // setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
+        // findCurrentBottomShiftShape();
+        // m_ftimeMultiplier = getCurrentLevelMultiplier();
+        // m_boolAllowedTimeStarted = false;
+        // m_boolCanAccelerate = false;
+        // m_iscore += 7; // TODO
+        // m_strscore = std::to_string(m_iscore);
+
+        m_boolshouldIa = true;
+    }
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) && m_boolshouldIa) {
+        m_boolshouldIa = false;
     }
 }
 
@@ -466,22 +531,22 @@ Board::findCurrentRightShiftShape()
     }
 }
 
-int
-Board::findCurrentRightShiftShape(int shape, int rotation)
-{
-    for (int x = SHAPE_SIZE - 1; x >= 0; x--) {
-        int firstCol = 0;
-        for (int y = 0; y < SHAPE_SIZE; y++) {
-            if (tt::gShapesArray[shape][rotation][y * SHAPE_SIZE + x] > 0) {
-                firstCol = 1;
-            }
-        }
-        if (firstCol == 1) {
-            return x;
-        }
-    }
-    return 0;
-}
+// int
+// Board::findCurrentRightShiftShape(int shape, int rotation)
+//{
+//     for (int x = SHAPE_SIZE - 1; x >= 0; x--) {
+//         int firstCol = 0;
+//         for (int y = 0; y < SHAPE_SIZE; y++) {
+//             if (tt::gShapesArray[shape][rotation][y * SHAPE_SIZE + x] > 0) {
+//                 firstCol = 1;
+//             }
+//         }
+//         if (firstCol == 1) {
+//             return x;
+//         }
+//     }
+//     return 0;
+// }
 
 void
 Board::findCurrentLeftShiftShape()
@@ -718,8 +783,6 @@ Board::warp()
 
     setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
     findCurrentBottomShiftShape();
-    // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
-    // m_ftimeMultiplier = getNextLevelMultiplier();
     m_ftimeMultiplier = getCurrentLevelMultiplier();
     m_boolAllowedTimeStarted = false;
     m_boolCanAccelerate = false;
@@ -824,9 +887,6 @@ Board::drawLevel()
         m_prenderWindow->draw(rectangle);
     }
     if (m_boolparticlesLevel) {
-        printf("particles level :%f\n",
-               LEVEL_SHIFT_HEIGHT -
-                 (m_icountLinesPerLevel) * (float)heightIncrement);
         m_particles.addParticles(LEVEL_SHIFT_LEFT,
                                  LEVEL_SHIFT_HEIGHT -
                                    (m_icountLinesPerLevel + 1) *

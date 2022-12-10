@@ -22,6 +22,9 @@
     <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\ia.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\CMakeLists.txt" />
@@ -30,5 +33,10 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{BCA19BFA-47D4-3205-A6A2-1707B6608360}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="globals.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

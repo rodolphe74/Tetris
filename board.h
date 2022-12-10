@@ -75,10 +75,11 @@ class Board
     int m_arlinesToRemove[GRID_H] = { 0 };
     float m_currentLineExtension = 0.0f;
     float m_currentLineExtensionStep = 1.0f;
-    int m_ishapesQueue[6];
+    int m_ishapesQueue[SHAPES_QUEUE_SIZE];
     bool m_boolonceLineSound = false;
     bool m_boolshouldRotate = 0;
     bool m_boolshouldWarp = 0;
+    bool m_boolshouldIa = 0;
     bool m_boolparticlesLevel = false;
     int m_icountLines = 0;
     int m_icountLinesPerLevel = 0;
@@ -233,7 +234,7 @@ class Board
     void clearCurrentShape();
     void findCurrentBottomShiftShape();
     void findCurrentRightShiftShape();
-    int findCurrentRightShiftShape(int shape, int rotation);
+    //int findCurrentRightShiftShape(int shape, int rotation);
     void findCurrentLeftShiftShape();
     bool checkIfCurrentBottomShiftShapeCollide();
     bool checkIfCurrentLeftShiftShapeCollide();
