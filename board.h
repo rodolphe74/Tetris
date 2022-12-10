@@ -5,6 +5,8 @@
 #include "fog.h"
 #include "particles.h"
 #include "shapes.h"
+#include "math.h"
+#include "string.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 

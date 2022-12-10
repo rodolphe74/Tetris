@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 #include <array>
-#include <gl/GLU.h>
+#include <GL/glu.h>
 #include <glm/glm.hpp>
 #include "shapes3d.h"
 #include "constants.h"
