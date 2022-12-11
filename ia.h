@@ -31,6 +31,7 @@ class Ia
     static int findRightShiftShape(int shape, int rotation);
 
   public:
+    static int searchCount;
     static Pos findBestPosition(int argrid[GRID_H][GRID_W],
                                 int shapesQueue[SHAPES_QUEUE_SIZE],
                                 int currentShape,
@@ -39,7 +40,9 @@ class Ia
                                 int currentLeftShiftShape,
                                 int currentRightShiftShape,
                                 int row,
-                                int col);
+                                int col,
+                                int currentDepth,
+                                int fullDepth);
 
     static void debugGrid(int argrid[GRID_H][GRID_W]);
 };

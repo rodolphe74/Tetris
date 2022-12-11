@@ -383,6 +383,7 @@ Board::checkKeyboard()
 
         int updatedGrid[GRID_H][GRID_W] = { 0 };
 
+        Ia::searchCount = 0;
         Pos posIa = Ia::findBestPosition(m_argrid,
                                          m_ishapesQueue,
                                          m_currentShape,
@@ -391,7 +392,10 @@ Board::checkKeyboard()
                                          m_currentLeftShiftShape,
                                          m_currentRightShiftShape,
                                          m_currentShapeRow,
-                                         m_currentShapeCol);
+                                         m_currentShapeCol,
+                                         3,
+                                         3);
+        printf("Evaluated positions:%d\n", Ia::searchCount);
 
         int leftCount = m_currentShapeCol - posIa.col;
         int rightCount = posIa.col - m_currentShapeCol;

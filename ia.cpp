@@ -1,5 +1,7 @@
 #include "ia.h"
 
+int Ia::searchCount = 0;
+
 int
 Ia::freezeShape(int argrid[GRID_H][GRID_W],
                 int shape,
@@ -59,8 +61,18 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                      int currentLeftShiftShape,
                      int currentRightShiftShape,
                      int row,
-                     int col)
+                     int col,
+                     int currentDepth,
+                     int fullDepth)
 {
+
+    if (currentDepth == 0) {
+        searchCount++;
+        int score = getScore(argrid);
+        Pos pos = { row, col, currentRotation, currentShape, score };
+        return pos;
+    }
+
     // find best score at row
     int bestScore = 0;
     int bestCol = 0;
@@ -75,7 +87,8 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
 
         // find max moves at row,col
         int minLeft = 0, maxRight = 0;
-        for (int x = col; x >= 0; x--) {
+        for (int x = col; x >= -1;
+             x--) { // -1 to compensate empty left margin of certain shapes
             minLeft = x;
             if (x <= 0 - currentLeftShiftShape)
                 break;
@@ -93,7 +106,12 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                 break;
         }
 
-        printf("minLeft:%d   maxRight:%d\n", minLeft, maxRight);
+        //printf("minLeft:%d   maxRight:%d   currentLeftShiftShape:%d   "
+        //       "currentRightShiftShape:%d\n",
+        //       minLeft,
+        //       maxRight,
+        //       currentLeftShiftShape,
+        //       currentRightShiftShape);
 
         for (int x = minLeft; x <= maxRight; x++) {
             int updatedGrid[GRID_H][GRID_W] = { 0 };
@@ -105,7 +123,27 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                                     currentBottomShiftShape,
                                     rot,
                                     updatedGrid);
-            int currentScore = getScore(updatedGrid);
+
+            if (fullDepth - currentDepth != 0) {
+                //printf("Shape Queue:%d\n", fullDepth - currentDepth - 1);
+                currentShape = shapesQueue[fullDepth - currentDepth - 1];
+            }
+
+            //printf("CurrentShape:%d\n", currentShape);
+
+            Pos currentPos = findBestPosition(updatedGrid,
+                                              shapesQueue,
+                                              currentShape,
+                                              currentRotation,
+                                              currentBottomShiftShape,
+                                              currentLeftShiftShape,
+                                              currentRightShiftShape,
+                                              row,
+                                              col,
+                                              currentDepth - 1,
+                                              fullDepth);
+            int currentScore = currentPos.score;
+
             if (currentScore > bestScore) {
                 bestScore = currentScore;
                 bestCol = x;
@@ -113,12 +151,15 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                 bestRot = rot;
             }
             //Ia::debugGrid(updatedGrid);
+            //printf("Score:%d\n\n", currentScore);
         }
     }
-    printf(
-      "bestScore:%d / bestCol:%d / bestRow:%d\n", bestScore, bestCol, bestRow);
 
-    Pos pos = { bestRow, bestCol, bestRot, currentShape };
+    // printf(
+    //   "bestScore:%d / bestCol:%d / bestRow:%d\n", bestScore, bestCol,
+    //   bestRow);
+
+    Pos pos = { bestRow, bestCol, bestRot, currentShape, bestScore };
 
     return pos;
 }
@@ -139,13 +180,7 @@ Ia::getScore(int argrid[GRID_H][GRID_W])
             if (x < GRID_W - 1 && argrid[y][x] == SOMETHING_IN_SQUARE &&
                 argrid[y][x + 1] == SOMETHING_IN_SQUARE) {
                 lineScore += 2 * y;
-                printf("%d,%d/+2 ", x, y);
             }
-            // if ((x == 0 || x == GRID_W - 1) &&
-            //     argrid[y][x] == SOMETHING_IN_SQUARE) {
-            //     lineScore += y;
-            //     printf("%d,%d/+1 ", x, y);
-            // }
         }
         score += lineScore;
         if (lineSquare == GRID_W) {
