@@ -1,5 +1,7 @@
 #pragma once
 
+#include "board.h"
+
 struct Pos
 {
     int row, col;

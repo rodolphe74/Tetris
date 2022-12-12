@@ -59,6 +59,9 @@ void
 stopCurrentAudioStream();
 
 void
+stopAutoplayThread();
+
+void
 gameIntro();
 
 void

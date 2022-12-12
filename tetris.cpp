@@ -57,6 +57,7 @@ stopCurrentAudioStream()
     }
 }
 
+
 void
 gameIntro()
 {
@@ -137,7 +138,9 @@ init()
 void
 freeAndExit()
 {
+    board->freeAutoplayThread();
     stopCurrentAudioStream();
+
     if (introThread != NULL)
         delete introThread;
 
@@ -238,6 +241,7 @@ main()
 
         if (gameMode == NEW_GAME) {
             board->m_egameState = none;
+            board->m_waitNextTurn = true;
             board->render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
                           WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
                           countFrames,
@@ -273,6 +277,7 @@ main()
                 musicThread = new sf::Thread(&playThemeOne);
                 musicThread->launch();
                 board->m_egameState = scrollDown;
+                board->m_waitNextTurn = false;
                 gameMode = GAME;
             }
         }

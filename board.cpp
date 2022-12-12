@@ -310,12 +310,29 @@ Board::render(float shiftLeft,
             m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_egameState = scrollDown;
             m_boolonceLineSound = false;
+            // in case of AUTOPLAY authorize computer to play next shape after
+            // lines scrolling down effect
+            m_waitNextTurn = false;
         }
     }
 
+    // shall we free some allocated resources
+    if (!m_bisComputerMoving && m_moveComputerThreadAllocated) {
+        printf("freeing thread allocation\n");
+        delete m_moveComputerThread;
+        m_moveComputerThreadAllocated = false;
+    }
+
+    // Are we in autoplay ?
+    if (AUTOPLAY && !m_bisComputerMoving && !m_waitNextTurn &&
+        m_egameState != gameOver && m_egameState != none) {
+        iaMoveThread();
+        m_waitNextTurn = true;
+    }
+
     if (m_egameState == gameOver) {
+        m_waitNextTurn = true;
         youLoose();
-        // m_egameState = none;
     }
 
     if (framesCount == frameRate * 1000) {
@@ -370,80 +387,22 @@ Board::checkKeyboard()
     if (m_boolshouldWarp &&
         sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
         m_egameState != none) {
-        warp();
         m_boolshouldWarp = false;
+        warp();
     }
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
         !m_boolshouldWarp && m_egameState != none) {
         m_boolshouldWarp = true;
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) && !m_boolshouldIa) {
-        printf("IA\n");
-
-        int updatedGrid[GRID_H][GRID_W] = { 0 };
-
-        Ia::searchCount = 0;
-        Pos posIa = Ia::findBestPosition(m_argrid,
-                                         m_ishapesQueue,
-                                         m_currentShape,
-                                         m_currentShapeRotation,
-                                         m_currentBottomShiftShape,
-                                         m_currentLeftShiftShape,
-                                         m_currentRightShiftShape,
-                                         m_currentShapeRow,
-                                         m_currentShapeCol,
-                                         3,
-                                         3);
-        printf("Evaluated positions:%d\n", Ia::searchCount);
-
-        int leftCount = m_currentShapeCol - posIa.col;
-        int rightCount = posIa.col - m_currentShapeCol;
-        int rotateCount = abs(posIa.rotation - m_currentShapeRotation) % 4;
-        printf("left:%d  right:%d   rotate:%d\n",
-               leftCount,
-               rightCount,
-               rotateCount);
-        if (rotateCount > 0) {
-            for (int i = 0; i < rotateCount; i++)
-                rotate();
-        }
-        if (rightCount > 0) {
-            for (int i = 0; i < rightCount; i++)
-                right();
-        } else if (leftCount > 0) {
-            for (int i = 0; i < leftCount; i++)
-                left();
-        }
-
-        // int i = 0;
-        // for (int y = posIa.row; y < posIa.row + SHAPE_SIZE; y++) {
-        //     for (int x = posIa.col; x < posIa.col + SHAPE_SIZE; x++) {
-        //         printf("%d-", i);
-        //         if (y < GRID_H && x < GRID_W) {
-        //             int v = tt::gShapesArray[m_currentShape]
-        //                                     [posIa.rotation][i];
-        //             if (v)
-        //                 m_argrid[y][x] = SOMETHING_IN_SQUARE;
-        //         }
-        //         i++;
-        //     }
-        // }
-        // clearCurrentShape();
-        // removesFullLines();
-        // setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
-        // findCurrentBottomShiftShape();
-        // m_ftimeMultiplier = getCurrentLevelMultiplier();
-        // m_boolAllowedTimeStarted = false;
-        // m_boolCanAccelerate = false;
-        // m_iscore += 7; // TODO
-        // m_strscore = std::to_string(m_iscore);
-
-        m_boolshouldIa = true;
-    }
-    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) && m_boolshouldIa) {
-        m_boolshouldIa = false;
-    }
+    // if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) && !m_boolshouldIa) {
+    //     printf("IA\n");
+    //     iaMoveThread();
+    //     m_boolshouldIa = true;
+    // }
+    // if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) && m_boolshouldIa) {
+    //     m_boolshouldIa = false;
+    // }
 }
 
 void
@@ -535,23 +494,6 @@ Board::findCurrentRightShiftShape()
     }
 }
 
-// int
-// Board::findCurrentRightShiftShape(int shape, int rotation)
-//{
-//     for (int x = SHAPE_SIZE - 1; x >= 0; x--) {
-//         int firstCol = 0;
-//         for (int y = 0; y < SHAPE_SIZE; y++) {
-//             if (tt::gShapesArray[shape][rotation][y * SHAPE_SIZE + x] > 0) {
-//                 firstCol = 1;
-//             }
-//         }
-//         if (firstCol == 1) {
-//             return x;
-//         }
-//     }
-//     return 0;
-// }
-
 void
 Board::findCurrentLeftShiftShape()
 {
@@ -636,6 +578,7 @@ Board::freezeCurrentShape()
 bool
 Board::removesFullLines()
 {
+    m_boolshouldWarp = false;
     memset(m_arlinesToRemove, 0, sizeof(m_arlinesToRemove));
     for (int y = GRID_H - 1; y >= 0; y--) {
         int fullLine = 1;
@@ -673,6 +616,11 @@ Board::removesFullLines()
         m_currentLineExtensionStep =
           ((GRID_W + 2) * PIXEL_SQUARE_SIZE) /
           ((float)(LINE_TIME_MS) / (float)(FRAME_RATE));
+    } else {
+        // in case of AUTOPLAY authorize computer to play next shape since a
+        // shape
+        // was freezed before calling this function
+        m_waitNextTurn = false;
     }
 
     return isLinesToRemove;
@@ -1084,4 +1032,75 @@ float
 Board::getCurrentLevelMultiplier()
 {
     return (float)(1 - 0.03 * m_ilevel);
+}
+
+void
+Board::iaMoveThread()
+{
+    if (!m_bisComputerMoving && !m_moveComputerThreadAllocated) {
+        m_moveComputerThread = new sf::Thread([this]() {
+            m_bisComputerMoving = true;
+            m_moveComputerThreadAllocated = true;
+            Ia::searchCount = 0;
+            Pos posIa = Ia::findBestPosition(m_argrid,
+                                             m_ishapesQueue,
+                                             m_currentShape,
+                                             m_currentShapeRotation,
+                                             m_currentBottomShiftShape,
+                                             m_currentLeftShiftShape,
+                                             m_currentRightShiftShape,
+                                             m_currentShapeRow,
+                                             m_currentShapeCol,
+                                             3,
+                                             3);
+            printf("Evaluated positions:%d\n", Ia::searchCount);
+
+            int leftCount = m_currentShapeCol - posIa.col;
+            int rightCount = posIa.col - m_currentShapeCol;
+            int rotateCount = abs(posIa.rotation - m_currentShapeRotation) % 4;
+            printf("left:%d  right:%d   rotate:%d\n",
+                   leftCount,
+                   rightCount,
+                   rotateCount);
+
+            // Move shape with human clumsiness and slow speed
+            if (rotateCount > 0) {
+                for (int i = 0; i < rotateCount; i++) {
+                    sf::sleep(
+                      sf::milliseconds(SLEEP_TIME_BETWEEN_EVERY_MOVE_MS));
+                    rotate();
+                }
+            }
+
+            if (rightCount > 0) {
+                m_boolOnceMoveSound = true;
+                for (int i = 0; i < rightCount; i++) {
+                    sf::sleep(
+                      sf::milliseconds(SLEEP_TIME_BETWEEN_EVERY_MOVE_MS));
+                    right();
+                }
+            } else if (leftCount > 0) {
+                m_boolOnceMoveSound = true;
+                for (int i = 0; i < leftCount; i++) {
+                    sf::sleep(
+                      sf::milliseconds(SLEEP_TIME_BETWEEN_EVERY_MOVE_MS));
+                    left();
+                }
+            }
+
+            sf::sleep(sf::milliseconds(SLEEP_TIME_BETWEEN_EVERY_MOVE_MS));
+            warp();
+
+            m_bisComputerMoving = false;
+        });
+        m_moveComputerThread->launch();
+    }
+}
+
+void
+Board::freeAutoplayThread()
+{
+    if (m_moveComputerThreadAllocated) {
+        delete m_moveComputerThread;
+    }
 }

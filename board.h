@@ -43,6 +43,11 @@ class Board
     sf::Clock m_allowedTimeToMoveAwayClock;
     sf::Clock m_keyLatencyClock;
 
+    // Thread
+    sf::Thread *m_moveComputerThread = NULL;
+    bool m_bisComputerMoving = false;
+    bool m_moveComputerThreadAllocated = false;
+
     // Sounds
     sf::SoundBuffer m_soundBufferIntro;
     sf::Sound m_soundIntro;
@@ -93,6 +98,7 @@ class Board
 
   public:
     GameState m_egameState = none;
+    bool m_waitNextTurn = true;
     int m_ilevel = 1;
     bool m_boolOnceMoveSound = true;
     bool m_boolAllowedTimeStarted = false;
@@ -236,7 +242,6 @@ class Board
     void clearCurrentShape();
     void findCurrentBottomShiftShape();
     void findCurrentRightShiftShape();
-    //int findCurrentRightShiftShape(int shape, int rotation);
     void findCurrentLeftShiftShape();
     bool checkIfCurrentBottomShiftShapeCollide();
     bool checkIfCurrentLeftShiftShapeCollide();
@@ -261,4 +266,6 @@ class Board
     tt::rect locateCurrentShape();
     float getNextLevelMultiplier();
     float getCurrentLevelMultiplier();
+    void iaMoveThread();
+    void freeAutoplayThread();
 };

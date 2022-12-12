@@ -49,9 +49,8 @@ constexpr int LEVELF_SHIFT_LEFT = 588;
 constexpr int LEVELF_SHIFT_HEIGHT = 486;
 constexpr int LEVELF_FONT_SIZE = 24;
 
-
-
 constexpr float QUICK_TIME_MULTIPLIER = 0.08f;
 constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;
 
-
+constexpr bool AUTOPLAY = false;
+constexpr int SLEEP_TIME_BETWEEN_EVERY_MOVE_MS = 70;
