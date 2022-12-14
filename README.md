@@ -1,3 +1,3 @@
 # Tetris
 
-![alt text](underconstruction.png)
+![alt text](tetrisw.png)
