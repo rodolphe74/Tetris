@@ -1,3 +1,3 @@
 # Tetris
 
-![alt text](tetrisw.png)
+![alt text](tetrisw.gif)
