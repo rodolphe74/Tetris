@@ -266,14 +266,14 @@ main()
                   countFrames,
                   FRAME_RATE);
 
-                // send lines to the oppenent ?
+                // send lines to the opponent ?
                 if (humanBoard->m_icountScrolledDown > 1) {
-                    printf("Pénalité ordinateur :%d\n",
+                    printf("send lines to computer :%d\n",
                            humanBoard->m_icountScrolledDown - 1);
                     humanBoard->m_icountScrolledDown = 0;
                 }
                 if (computerBoard->m_icountScrolledDown > 1) {
-                    printf("Pénalité human :%d\n",
+                    printf("send lines to human :%d\n",
                            computerBoard->m_icountScrolledDown - 1);
                     computerBoard->m_icountScrolledDown = 0;
                 }
