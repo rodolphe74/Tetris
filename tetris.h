@@ -8,15 +8,23 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
-enum modeEnum
+enum menuEnum
 {
-    GAME,
     NEW_GAME,
     MENU,
-    EXIT
+    EXIT,
+    SELECTION_MADE
 };
 
-static modeEnum gameMode = MENU;
+enum gameModeEnum
+{
+    WAIT_SELECTION,
+    GAME_HUMAN_ALONE,
+    GAME_HUMAN_VS_COMPUTER
+};
+
+static menuEnum menuStep = MENU;
+static gameModeEnum gameMode = WAIT_SELECTION;
 static sf::SoundBuffer soundBufferMainOne;
 static sf::SoundBuffer soundBufferMainTwo;
 static sf::SoundBuffer soundBufferMainThree;
@@ -39,12 +47,15 @@ static sf::Thread* introThread = NULL;
 static sf::ContextSettings contextSettings;
 static sf::Event event;
 static sf::RenderWindow* window;
-static Board* board;
+static Board* humanBoard = NULL;
+static Board* computerBoard = NULL;
 static AnimatedBackground* background;
 static Particles particles;
 static Menu* menu;
 static sf::Font gameFont;
 static int counter = -1;
+static int model;
+static int material;
 
 void
 playThemeOne();
@@ -59,9 +70,6 @@ void
 stopCurrentAudioStream();
 
 void
-stopAutoplayThread();
-
-void
 gameIntro();
 
 void
@@ -69,3 +77,9 @@ init();
 
 void
 freeAndExit();
+
+void
+newGameIntroOrchestration();
+
+void
+newGameIntroRender(bool isComputerPlaying, int& countFrames);

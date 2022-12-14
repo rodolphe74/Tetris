@@ -43,8 +43,8 @@ AnimatedBackground::renderBackground(const float* shape,
     glClearColor(.0f, .122f, .596f, 1.0f);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    for (int y = -6; y < 6; y++) {
-        for (int x = -10; x < 10; x++) {
+    for (int y = -8; y < 8; y++) {
+        for (int x = -12; x < 12; x++) {
             glPushMatrix();
 
             glTranslatef(x * 4 + cos(m_fcountAngle) * 16,

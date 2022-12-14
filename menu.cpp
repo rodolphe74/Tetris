@@ -62,6 +62,8 @@ Menu::render()
                       WINDOW_H / 2 - m_fheight / 2 + y -
                         m_vecItems.size() * FONT_LEADING);
         i.setFillColor(sf::Color::Black);
+        i.setOutlineColor(sf::Color::Black);
+        i.setOutlineThickness(0);
         m_prenderWindow->draw(i);
         y += i.getGlobalBounds().height;
 
@@ -89,7 +91,7 @@ int
 Menu::checkKeyboard()
 {
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && m_boolkeyReleased) {
         m_iselectedItem =
           (int)(m_iselectedItem >= m_vecItems.size() - 1 ? m_vecItems.size() - 1
                                                          : m_iselectedItem + 1);
@@ -97,22 +99,30 @@ Menu::checkKeyboard()
             m_soundMove.play();
             m_boolcanSound = false;
         }
+        m_boolkeyReleased = false;
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && m_boolkeyReleased) {
         m_iselectedItem = (m_iselectedItem <= 0 ? 0 : m_iselectedItem - 1);
         if (m_boolcanSound) {
             m_soundMove.play();
             m_boolcanSound = false;
         }
+        m_boolkeyReleased = false;
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter) && m_boolkeyReleased) {
         if (m_boolcanSound) {
             m_soundWarp.play();
             m_boolcanSound = false;
         }
+        m_boolkeyReleased = false;
         return m_vecItems[m_iselectedItem].value;
+    }
+
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up) &&
+        !sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        m_boolkeyReleased = true;
     }
 
     return NO_ITEM_SELECTED;

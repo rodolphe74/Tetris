@@ -104,6 +104,8 @@ class Board
     bool m_boolAllowedTimeStarted = false;
     bool m_boolCanAccelerate = true;
     float m_ftimeMultiplier = 1.0f;
+    bool m_boolAutoplay = false;
+    int m_icountScrolledDown = 0;
 
     // Music
     static sf::SoundBuffer m_soundBufferMainOne;

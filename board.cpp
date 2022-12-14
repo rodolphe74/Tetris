@@ -79,7 +79,7 @@ Board::render(float shiftLeft,
     m_currentFrameRate = frameRate;
     m_currentFrameCount = framesCount;
 
-    // Draw board
+    // Draw humanBoard
     sf::RectangleShape r(
       sf::Vector2f(GRID_W * PIXEL_SQUARE_SIZE, GRID_H * PIXEL_SQUARE_SIZE));
     r.setFillColor(sf::Color(sf::Color::Black));
@@ -110,7 +110,9 @@ Board::render(float shiftLeft,
     }
 
     // Draw border
-    m_borderSprite.setPosition(BORDER_SHIFT_LEFT, BORDER_SHIFT_HEIGHT);
+    m_borderSprite.setPosition(shiftLeft + BORDER_SHIFT_LEFT_RELATIVE_TO_GRID,
+                               shiftHeight +
+                                 BORDER_SHIFT_HEIGHT_RELATIVE_TO_GRID);
     m_prenderWindow->draw(m_borderSprite);
 
     // Draw next shapes
@@ -269,13 +271,13 @@ Board::render(float shiftLeft,
         }
 
         //  Wait a bit before scrolling lines down
-        int countScrolledDown = 0;
+        m_icountScrolledDown = 0;
         if (m_waitClock.getElapsedTime().asMilliseconds() >
             WAIT_BEFORE_SCROLLING_DOWN_MS) {
             for (int y = 0; y < GRID_H; y++) {
                 if (m_arlinesToRemove[y]) {
                     scrollEverythingDown(y);
-                    countScrolledDown++;
+                    m_icountScrolledDown++;
                     m_icountLines++;
                     m_icountLinesPerLevel++;
                     m_strcountLines = std::to_string(m_icountLines);
@@ -288,13 +290,13 @@ Board::render(float shiftLeft,
                     }
                 }
             }
-            if (countScrolledDown == 1) {
+            if (m_icountScrolledDown == 1) {
                 m_iscore += m_ilevel * 100;
-            } else if (countScrolledDown == 2) {
+            } else if (m_icountScrolledDown == 2) {
                 m_iscore += m_ilevel * 300;
-            } else if (countScrolledDown == 3) {
+            } else if (m_icountScrolledDown == 3) {
                 m_iscore += m_ilevel * 500;
-            } else if (countScrolledDown == 4) {
+            } else if (m_icountScrolledDown == 4) {
                 m_iscore += m_ilevel * 800;
             }
             m_strscore = std::to_string(m_iscore);
@@ -319,12 +321,12 @@ Board::render(float shiftLeft,
     // shall we free some allocated resources
     if (!m_bisComputerMoving && m_moveComputerThreadAllocated) {
         printf("freeing thread allocation\n");
-        delete m_moveComputerThread;
         m_moveComputerThreadAllocated = false;
+        delete m_moveComputerThread;
     }
 
     // Are we in autoplay ?
-    if (AUTOPLAY && !m_bisComputerMoving && !m_waitNextTurn &&
+    if (m_boolAutoplay && !m_bisComputerMoving && !m_waitNextTurn &&
         m_egameState != gameOver && m_egameState != none) {
         iaMoveThread();
         m_waitNextTurn = true;
@@ -811,8 +813,12 @@ Board::drawNextShapes()
             for (int x = 0; x < SHAPE_SIZE; x++) {
                 if (y < GRID_H && x < GRID_W && shape[squarecount] == 1) {
                     renderSmallSquare(
-                      { NEXT_SHAPES_SHIFT_LEFT + x * squareSize,
-                        NEXT_SHAPES_SHIFT_HEIGHT + nextHeight + y * squareSize,
+                      { (int)m_currentShiftLeft +
+                          NEXT_SHAPES_SHIFT_LEFT_RELATIVE_TO_GRID +
+                          x * squareSize,
+                        (int)m_currentShiftHeight +
+                          NEXT_SHAPES_SHIFT_HEIGHT_RELATIVE_TO_GRID +
+                          nextHeight + y * squareSize,
                         0,
                         0 },
                       tt::gShapesColor[shapeIndex]);
@@ -831,20 +837,21 @@ Board::drawLevel()
     for (int i = 0; i < m_icountLinesPerLevel; i++) {
         sf::RectangleShape rectangle(
           sf::Vector2f(LEVEL_WIDTH, -(i + 1) * (float)heightIncrement));
-        rectangle.setPosition(
-          sf::Vector2f(LEVEL_SHIFT_LEFT, LEVEL_SHIFT_HEIGHT));
+        rectangle.setPosition(sf::Vector2f(
+          m_currentShiftLeft + LEVEL_SHIFT_LEFT_RELATIVE_TO_GRID,
+          m_currentShiftHeight + LEVEL_SHIFT_HEIGHT_RELATIVE_TO_GRID));
         rectangle.setFillColor(sf::Color(0, 255, 255, 255 / LINES_PER_LEVEL));
         rectangle.setOutlineColor(sf::Color(0, 255, 255, 255));
         rectangle.setOutlineThickness(1);
         m_prenderWindow->draw(rectangle);
     }
     if (m_boolparticlesLevel) {
-        m_particles.addParticles(LEVEL_SHIFT_LEFT,
-                                 LEVEL_SHIFT_HEIGHT -
-                                   (m_icountLinesPerLevel + 1) *
-                                     (float)heightIncrement,
-                                 30,
-                                 3);
+        m_particles.addParticles(
+          m_currentShiftLeft + LEVEL_SHIFT_LEFT_RELATIVE_TO_GRID,
+          m_currentShiftHeight + LEVEL_SHIFT_HEIGHT_RELATIVE_TO_GRID -
+            (m_icountLinesPerLevel + 1) * (float)heightIncrement,
+          30,
+          3);
         m_boolparticlesLevel = false;
     }
 }
@@ -857,7 +864,9 @@ Board::drawScore()
     scoreText.setFillColor(sf::Color::Black);
     scoreText.setOutlineColor(sf::Color::White);
     scoreText.setOutlineThickness(0.8f);
-    scoreText.setPosition(SCORE_SHIFT_LEFT - scoreWidth, SCORE_SHIFT_HEIGHT);
+    scoreText.setPosition(
+      m_currentShiftLeft + SCORE_SHIFT_LEFT_RELATIVE_TO_GRID - scoreWidth,
+      m_currentShiftHeight + SCORE_SHIFT_HEIGHT_RELATIVE_TO_GRID);
     m_prenderWindow->draw(scoreText);
 
     sf::Text lineText(m_strcountLines, m_gameFont, LINE_FONT_SIZE);
@@ -865,7 +874,9 @@ Board::drawScore()
     lineText.setFillColor(sf::Color::Black);
     lineText.setOutlineColor(sf::Color::White);
     lineText.setOutlineThickness(0.8f);
-    lineText.setPosition(LINE_SHIFT_LEFT - lineWidth, LINE_SHIFT_HEIGHT);
+    lineText.setPosition(
+      m_currentShiftLeft + LINE_SHIFT_LEFT_RELATIVE_TO_GRID - lineWidth,
+      m_currentShiftHeight + LINE_SHIFT_HEIGHT_RELATIVE_TO_GRID);
     m_prenderWindow->draw(lineText);
 
     sf::Text levelText(m_strlevel, m_gameFont, LEVELF_FONT_SIZE);
@@ -873,7 +884,9 @@ Board::drawScore()
     levelText.setFillColor(sf::Color::Black);
     levelText.setOutlineColor(sf::Color::White);
     levelText.setOutlineThickness(0.8f);
-    levelText.setPosition(LEVELF_SHIFT_LEFT - levelWidth, LEVELF_SHIFT_HEIGHT);
+    levelText.setPosition(
+      m_currentShiftLeft + LEVELF_SHIFT_LEFT_RELATIVE_TO_GRID - levelWidth,
+      m_currentShiftHeight + LEVELF_SHIFT_HEIGHT_RELATIVE_TO_GRID);
     m_prenderWindow->draw(levelText);
 }
 
@@ -1038,9 +1051,10 @@ void
 Board::iaMoveThread()
 {
     if (!m_bisComputerMoving && !m_moveComputerThreadAllocated) {
+        m_moveComputerThreadAllocated = true;
         m_moveComputerThread = new sf::Thread([this]() {
             m_bisComputerMoving = true;
-            m_moveComputerThreadAllocated = true;
+            /*m_moveComputerThreadAllocated = true;*/
             Ia::searchCount = 0;
             Pos posIa = Ia::findBestPosition(m_argrid,
                                              m_ishapesQueue,
@@ -1051,8 +1065,8 @@ Board::iaMoveThread()
                                              m_currentRightShiftShape,
                                              m_currentShapeRow,
                                              m_currentShapeCol,
-                                             3,
-                                             3);
+                                             AUTOPLAY_DEPTH,
+                                             AUTOPLAY_DEPTH);
             printf("Evaluated positions:%d\n", Ia::searchCount);
 
             int leftCount = m_currentShapeCol - posIa.col;
@@ -1101,6 +1115,7 @@ void
 Board::freeAutoplayThread()
 {
     if (m_moveComputerThreadAllocated) {
+        m_moveComputerThread->wait();
         delete m_moveComputerThread;
     }
 }

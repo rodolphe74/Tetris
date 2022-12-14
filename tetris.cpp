@@ -57,7 +57,6 @@ stopCurrentAudioStream()
     }
 }
 
-
 void
 gameIntro()
 {
@@ -118,27 +117,40 @@ init()
     window->setFramerateLimit(FRAME_RATE);
     window->setVerticalSyncEnabled(true);
 
-    board = new Board(*window);
-    board->clear();
-    board->setCurrentShape(
-      board->getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
-    board->findCurrentBottomShiftShape();
-    board->findCurrentLeftShiftShape();
-    board->findCurrentRightShiftShape();
-    board->m_egameState = scrollDown;
-    board->normalSpeed();
+    humanBoard = new Board(*window);
+    humanBoard->clear();
+    humanBoard->setCurrentShape(
+      humanBoard->getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
+    humanBoard->findCurrentBottomShiftShape();
+    humanBoard->findCurrentLeftShiftShape();
+    humanBoard->findCurrentRightShiftShape();
+    humanBoard->m_egameState = none;
+    humanBoard->normalSpeed();
+
+    // not always used
+    computerBoard = new Board(*window);
+    computerBoard->clear();
+    computerBoard->setCurrentShape(
+      computerBoard->getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
+    computerBoard->findCurrentBottomShiftShape();
+    computerBoard->findCurrentLeftShiftShape();
+    computerBoard->findCurrentRightShiftShape();
+    computerBoard->m_egameState = none;
+    computerBoard->normalSpeed();
 
     background = new AnimatedBackground(*window);
 
     menu = new Menu(*window);
-    menu->addItem({ "New game", 1, sf::Keyboard::F1 });
+    menu->addItem({ "Human alone", 1, sf::Keyboard::F1 });
+    menu->addItem({ "Human vs computer", 2, sf::Keyboard::F2 });
     menu->addItem({ "Exit", 3, sf::Keyboard::F2 });
 }
 
 void
 freeAndExit()
 {
-    board->freeAutoplayThread();
+    computerBoard->m_egameState = none;
+    computerBoard->freeAutoplayThread();
     stopCurrentAudioStream();
 
     if (introThread != NULL)
@@ -149,7 +161,8 @@ freeAndExit()
 
     delete menu;
     delete background;
-    delete board;
+    delete humanBoard;
+    delete computerBoard;
     delete window;
 }
 
@@ -169,7 +182,7 @@ main()
     int mode = 0;
 
     // Start game
-    if (gameMode == MENU) {
+    if (menuStep == MENU) {
         musicThread = new sf::Thread(&playThemeThree);
         musicThread->launch();
     }
@@ -189,7 +202,7 @@ main()
                 case sf::Event::KeyReleased:
                     if (event.key.code == sf::Keyboard::Left ||
                         event.key.code == sf::Keyboard::Right)
-                        board->m_boolOnceMoveSound = true;
+                        humanBoard->m_boolOnceMoveSound = true;
                     menu->m_boolcanSound = true;
                     break;
 
@@ -202,87 +215,77 @@ main()
             }
         }
 
-        // background->renderBackground(models.at(randomModel) + 1,
-        //                              (const size_t)models.at(randomModel)[0],
-        //                              materials.at(randomMaterial));
-
-        int model = board->m_ilevel % models.size();
-        int material = board->m_ilevel % materials.size();
+        int model = humanBoard->m_ilevel % models.size();
+        int material = humanBoard->m_ilevel % materials.size();
         background->renderBackground(models.at(model) + 1,
                                      (const size_t)models.at(model)[0],
                                      materials.at(material));
 
-        // draw menu or board
+        // draw menu or humanBoard
         window->pushGLStates();
 
-        if (gameMode == MENU) {
+        if (menuStep == MENU) {
             item = menu->checkKeyboard();
             if (item == 1) {
-                gameMode = NEW_GAME;
-                stopCurrentAudioStream();
-                delete musicThread;
-                musicThread = NULL;
-                introThread = new sf::Thread(&gameIntro);
-                introThread->launch();
-                newGameAnimWait.restart();
+                menuStep = NEW_GAME;
+                gameMode = GAME_HUMAN_ALONE;
+                newGameIntroOrchestration();
+            } else if (item == 2) {
+                menuStep = NEW_GAME;
+                gameMode = GAME_HUMAN_VS_COMPUTER;
+                newGameIntroOrchestration();
             } else if (item == 3) {
-                gameMode = EXIT;
+                menuStep = EXIT;
             }
             menu->render();
         }
 
-        if (gameMode == GAME) {
-            board->checkKeyboard();
-            board->render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
-                          WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
-                          countFrames,
-                          FRAME_RATE);
-        }
+        if (menuStep == SELECTION_MADE) {
+            if (gameMode == GAME_HUMAN_ALONE) {
+                humanBoard->m_boolAutoplay = false;
+                humanBoard->checkKeyboard();
+                humanBoard->render(
+                  WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                  WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                  countFrames,
+                  FRAME_RATE);
+            } else {
+                // GAME_HUMAN_VS_COMPUTER
+                humanBoard->m_boolAutoplay = false;
+                humanBoard->checkKeyboard();
+                humanBoard->render(
+                  3 * (WINDOW_W / 4) - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                  WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                  countFrames,
+                  FRAME_RATE);
 
-        if (gameMode == NEW_GAME) {
-            board->m_egameState = none;
-            board->m_waitNextTurn = true;
-            board->render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
-                          WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
-                          countFrames,
-                          FRAME_RATE);
+                computerBoard->m_boolAutoplay = true;
+                computerBoard->render(
+                  WINDOW_W / 4 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                  WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                  countFrames,
+                  FRAME_RATE);
 
-            sf::Text t;
-            t.setFont(gameFont);
-            t.setCharacterSize(48);
-            if (counter == 4) {
-                t.setString("Ready");
-            } else if (counter == 3) {
-                t.setString("3");
-            } else if (counter == 2) {
-                t.setString("2");
-            } else if (counter == 1) {
-                t.setString("1");
-            } else if (counter == 0) {
-                t.setString("Go !");
-            }
-            if (counter != -1) {
-                sf::FloatRect rect = t.getLocalBounds();
-                t.setPosition(WINDOW_W / 2 - rect.width / 2,
-                              WINDOW_H / 2 - rect.height / 2);
-                t.setFillColor(sf::Color::White);
-                window->draw(t);
-            }
-
-            // Wait READY 3 2 1 GO before going into game mode
-            printf("%d\n", newGameAnimWait.getElapsedTime().asMilliseconds());
-            if (newGameAnimWait.getElapsedTime().asMilliseconds() >= 4000) {
-                delete introThread;
-                introThread = NULL;
-                musicThread = new sf::Thread(&playThemeOne);
-                musicThread->launch();
-                board->m_egameState = scrollDown;
-                board->m_waitNextTurn = false;
-                gameMode = GAME;
+                // send lines to the oppenent ?
+                if (humanBoard->m_icountScrolledDown > 1) {
+                    printf("Pénalité ordinateur :%d\n",
+                           humanBoard->m_icountScrolledDown - 1);
+                    humanBoard->m_icountScrolledDown = 0;
+                }
+                if (computerBoard->m_icountScrolledDown > 1) {
+                    printf("Pénalité human :%d\n",
+                           computerBoard->m_icountScrolledDown - 1);
+                    computerBoard->m_icountScrolledDown = 0;
+                }
             }
         }
 
-        if (gameMode == EXIT) {
+        if (menuStep == NEW_GAME) {
+            newGameIntroRender(gameMode == GAME_HUMAN_ALONE ? false : true,
+                               countFrames);
+        }
+
+        if (menuStep == EXIT) {
             break;
         }
 
@@ -295,4 +298,85 @@ main()
     freeAndExit();
 
     return 0;
+}
+
+void
+newGameIntroOrchestration()
+{
+    stopCurrentAudioStream();
+    delete musicThread;
+    musicThread = NULL;
+    introThread = new sf::Thread(&gameIntro);
+    introThread->launch();
+    newGameAnimWait.restart();
+}
+
+void
+newGameIntroRender(bool isComputerPlaying, int& countFrames)
+{
+
+    if (gameMode == GAME_HUMAN_ALONE) {
+        humanBoard->m_egameState = none;
+        humanBoard->m_waitNextTurn = true;
+        humanBoard->render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                           WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                           countFrames,
+                           FRAME_RATE);
+    } else {
+        // GAME_HUMAN_VS_COMPUTER
+        humanBoard->m_egameState = none;
+        humanBoard->m_waitNextTurn = true;
+        humanBoard->render(3 * (WINDOW_W / 4) -
+                             (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                           WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                           countFrames,
+                           FRAME_RATE);
+
+        computerBoard->m_egameState = none;
+        computerBoard->m_waitNextTurn = true;
+        computerBoard->render(WINDOW_W / 4 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                              WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                              countFrames,
+                              FRAME_RATE);
+    }
+
+    sf::Text t;
+    t.setFont(gameFont);
+    t.setCharacterSize(48);
+    if (counter == 4) {
+        t.setString("Ready");
+    } else if (counter == 3) {
+        t.setString("3");
+    } else if (counter == 2) {
+        t.setString("2");
+    } else if (counter == 1) {
+        t.setString("1");
+    } else if (counter == 0) {
+        t.setString("Go !");
+    }
+    if (counter != -1) {
+        sf::FloatRect rect = t.getLocalBounds();
+        t.setPosition(WINDOW_W / 2 - rect.width / 2,
+                      WINDOW_H / 2 - rect.height / 2);
+        t.setFillColor(sf::Color::White);
+        window->draw(t);
+    }
+
+    // Wait READY 3 2 1 GO before going into game mode
+    if (newGameAnimWait.getElapsedTime().asMilliseconds() >= 4000) {
+        delete introThread;
+        introThread = NULL;
+        musicThread = new sf::Thread(&playThemeOne);
+        musicThread->launch();
+
+        humanBoard->m_egameState = scrollDown;
+        humanBoard->m_waitNextTurn = false;
+
+        if (gameMode == GAME_HUMAN_VS_COMPUTER) {
+            computerBoard->m_egameState = scrollDown;
+            computerBoard->m_waitNextTurn = false;
+        }
+
+        menuStep = SELECTION_MADE;
+    }
 }

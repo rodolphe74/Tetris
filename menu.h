@@ -34,6 +34,7 @@ class Menu
     sf::Sound m_soundMove;
     sf::SoundBuffer m_soundBufferWarp;
     sf::Sound m_soundWarp;
+    bool m_boolkeyReleased = true;
 
   public:
     bool m_boolcanSound = true;
