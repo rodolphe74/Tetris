@@ -3,23 +3,14 @@
 #include "audioStream.h"
 #include "constants.h"
 #include "fog.h"
-#include "particles.h"
-#include "shapes.h"
+#include "globals.h"
 #include "math.h"
+#include "particles.h"
+#include "gameStatesQueue.h"
+#include "shapes.h"
 #include "string.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-
-enum GameState
-{
-    none,
-    scrollDown,
-    rotate,
-    scrollRight,
-    scrollLeft,
-    scrollLine,
-    gameOver
-};
 
 class Board
 {
@@ -44,7 +35,7 @@ class Board
     sf::Clock m_keyLatencyClock;
 
     // Thread
-    sf::Thread *m_moveComputerThread = NULL;
+    sf::Thread* m_moveComputerThread = NULL;
     bool m_bisComputerMoving = false;
     bool m_moveComputerThreadAllocated = false;
 
@@ -97,7 +88,8 @@ class Board
     std::string m_strlevel = "1";
 
   public:
-    GameState m_egameState = none;
+    GameStatesQueue m_equeueGameStates;
+    GameState m_ecurrentGameState;
     bool m_waitNextTurn = true;
     int m_ilevel = 1;
     bool m_boolOnceMoveSound = true;

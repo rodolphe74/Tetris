@@ -124,7 +124,7 @@ init()
     humanBoard->findCurrentBottomShiftShape();
     humanBoard->findCurrentLeftShiftShape();
     humanBoard->findCurrentRightShiftShape();
-    humanBoard->m_egameState = none;
+    humanBoard->m_equeueGameStates.pushBack(none);
     humanBoard->normalSpeed();
 
     // not always used
@@ -135,7 +135,7 @@ init()
     computerBoard->findCurrentBottomShiftShape();
     computerBoard->findCurrentLeftShiftShape();
     computerBoard->findCurrentRightShiftShape();
-    computerBoard->m_egameState = none;
+    humanBoard->m_equeueGameStates.pushBack(none);
     computerBoard->normalSpeed();
 
     background = new AnimatedBackground(*window);
@@ -149,7 +149,7 @@ init()
 void
 freeAndExit()
 {
-    computerBoard->m_egameState = none;
+    computerBoard->m_equeueGameStates.pushBack(none);
     computerBoard->freeAutoplayThread();
     stopCurrentAudioStream();
 
@@ -254,7 +254,7 @@ main()
                   FRAME_RATE);
 
                 // gameover ?
-                if (humanBoard->m_egameState == gameOver) {
+                if (humanBoard->m_ecurrentGameState == gameOver) {
                     humanBoard->looser(true);
                 }
             } else {
@@ -293,11 +293,11 @@ main()
                 }
 
                 // Check if one player is gameOver
-                if (humanBoard->m_egameState == gameOver) {
-                    computerBoard->m_egameState = none;
+                if (humanBoard->m_ecurrentGameState == gameOver) {
+                    computerBoard->m_equeueGameStates.pushBack(none);
                     humanBoard->looser(true);
-                } else if (computerBoard->m_egameState == gameOver) {
-                    humanBoard->m_egameState = none;
+                } else if (computerBoard->m_ecurrentGameState == gameOver) {
+                    humanBoard->m_equeueGameStates.pushBack(none);
                     computerBoard->looser(false);
                 }
             }
@@ -339,7 +339,7 @@ newGameIntroRender(bool isComputerPlaying, int& countFrames)
 {
 
     if (gameMode == GAME_HUMAN_ALONE) {
-        humanBoard->m_egameState = none;
+        humanBoard->m_equeueGameStates.pushBack(none);
         humanBoard->m_waitNextTurn = true;
         humanBoard->render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
                            WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
@@ -347,7 +347,7 @@ newGameIntroRender(bool isComputerPlaying, int& countFrames)
                            FRAME_RATE);
     } else {
         // GAME_HUMAN_VS_COMPUTER
-        humanBoard->m_egameState = none;
+        humanBoard->m_equeueGameStates.pushBack(none);
         humanBoard->m_waitNextTurn = true;
         humanBoard->render(3 * (WINDOW_W / 4) -
                              (GRID_W * PIXEL_SQUARE_SIZE) / 2,
@@ -355,7 +355,7 @@ newGameIntroRender(bool isComputerPlaying, int& countFrames)
                            countFrames,
                            FRAME_RATE);
 
-        computerBoard->m_egameState = none;
+        computerBoard->m_equeueGameStates.pushBack(none);
         computerBoard->m_waitNextTurn = true;
         computerBoard->render(WINDOW_W / 4 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
                               WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
@@ -392,11 +392,11 @@ newGameIntroRender(bool isComputerPlaying, int& countFrames)
         musicThread = new sf::Thread(&playThemeOne);
         musicThread->launch();
 
-        humanBoard->m_egameState = scrollDown;
+        humanBoard->m_equeueGameStates.pushBack(scrollDown);
         humanBoard->m_waitNextTurn = false;
 
         if (gameMode == GAME_HUMAN_VS_COMPUTER) {
-            computerBoard->m_egameState = scrollDown;
+            computerBoard->m_equeueGameStates.pushBack(scrollDown);
             computerBoard->m_waitNextTurn = false;
         }
 

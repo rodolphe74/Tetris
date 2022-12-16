@@ -25,6 +25,9 @@
     <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\ia.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\gameStatesQueue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\CMakeLists.txt" />

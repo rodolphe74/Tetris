@@ -86,6 +86,11 @@ Board::render(float shiftLeft,
     r.setPosition(sf::Vector2f(shiftLeft, shiftHeight));
     m_prenderWindow->draw(r);
 
+    // Get game state
+    m_equeueGameStates.debugQueueSize();
+    
+    m_ecurrentGameState = m_equeueGameStates.popFront(m_ecurrentGameState);
+
     for (int y = 0; y <= GRID_H; y++) {
         for (int x = 0; x <= GRID_W; x++) {
             sf::Vertex line[] = {
@@ -193,7 +198,7 @@ Board::render(float shiftLeft,
     m_fog.renderFog(*m_prenderWindow);
 
     // Game states
-    if (m_egameState == scrollDown) {
+    if (m_ecurrentGameState == scrollDown) {
 
         // Draw current shape
         for (int y = 0; y < GRID_H; y++) {
@@ -236,14 +241,14 @@ Board::render(float shiftLeft,
                         }
                     }
                 }
-                m_egameState = gameOver;
+                m_equeueGameStates.pushBack(gameOver);
                 m_soundGameOver.play();
             }
         }
     }
 
     // Check if full lines to remove
-    if (m_egameState == scrollLine) {
+    if (m_ecurrentGameState == scrollLine) {
         for (int y = 0; y < GRID_H; y++) {
             if (m_arlinesToRemove[y]) {
                 for (int x = 0; x < GRID_W; x++) {
@@ -309,7 +314,7 @@ Board::render(float shiftLeft,
 
             m_soundExplode.play();
             m_ftimeMultiplier = getCurrentLevelMultiplier();
-            m_egameState = scrollDown;
+            m_equeueGameStates.pushBack(scrollDown);
             m_boolonceLineSound = false;
             // in case of AUTOPLAY authorize computer to play next shape after
             // lines scrolling down effect
@@ -326,7 +331,7 @@ Board::render(float shiftLeft,
 
     // Are we in autoplay ?
     if (m_boolAutoplay && !m_bisComputerMoving && !m_waitNextTurn &&
-        m_egameState != gameOver && m_egameState != none) {
+        m_ecurrentGameState != gameOver && m_ecurrentGameState != none) {
         iaMoveThread();
         m_waitNextTurn = true;
     }
@@ -342,7 +347,7 @@ Board::checkKeyboard()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
         m_keyLatencyClock.getElapsedTime().asMilliseconds() >=
           REPEAT_KEYBOARD_LATENCY_MS &&
-        m_egameState != none) {
+        m_ecurrentGameState != none) {
         left();
         m_keyLatencyClock.restart();
     }
@@ -350,44 +355,44 @@ Board::checkKeyboard()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
         m_keyLatencyClock.getElapsedTime().asMilliseconds() >=
           REPEAT_KEYBOARD_LATENCY_MS &&
-        m_egameState != none) {
+        m_ecurrentGameState != none) {
         right();
         m_keyLatencyClock.restart();
     }
 
     if (m_boolshouldRotate && sf::Keyboard::isKeyPressed(sf::Keyboard::Up) &&
-        m_egameState != none) {
+        m_ecurrentGameState != none) {
         rotate();
         m_boolshouldRotate = false;
     }
 
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && !m_boolshouldRotate &&
-        m_egameState != none) {
+        m_ecurrentGameState != none) {
         m_boolshouldRotate = true;
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && m_boolCanAccelerate &&
-        m_egameState != none) {
+        m_ecurrentGameState != none) {
         accelerate();
         downSpecifics();
     }
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
-        !m_boolCanAccelerate && m_egameState != none) {
+        !m_boolCanAccelerate && m_ecurrentGameState != none) {
         m_boolCanAccelerate = true;
     }
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
-        m_egameState != none) {
+        m_ecurrentGameState != none) {
         normalSpeed();
     }
 
     if (m_boolshouldWarp &&
         sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
-        m_egameState != none) {
+        m_ecurrentGameState != none) {
         m_boolshouldWarp = false;
         warp();
     }
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) &&
-        !m_boolshouldWarp && m_egameState != none) {
+        !m_boolshouldWarp && m_ecurrentGameState != none) {
         m_boolshouldWarp = true;
     }
 
@@ -422,7 +427,7 @@ Board::drawFreezedAndGhostSquares(float shiftLeft, float shiftHeight)
                              tt::gFreezedColor,
                              false);
             } else if (m_arghost[y][x] == GHOST_IN_SQUARE &&
-                       m_egameState != gameOver) {
+                       m_ecurrentGameState != gameOver) {
                 renderSquare({ (int)shiftLeft + x * PIXEL_SQUARE_SIZE,
                                (int)shiftHeight + y * PIXEL_SQUARE_SIZE,
                                0,
@@ -615,7 +620,7 @@ Board::removesFullLines()
     if (isLinesToRemove == true) {
         // Add a wait effect before
         m_waitClock.restart();
-        m_egameState = scrollLine;
+        m_equeueGameStates.pushBack(scrollLine);
         m_currentLineExtension = 0.0f;
         m_currentLineExtensionStep =
           ((GRID_W + 2) * PIXEL_SQUARE_SIZE) /
@@ -636,7 +641,7 @@ Board::receiveLinesFromOpponent(int count)
     // TODO: How to do when 2 states at the same time
     // ie : scroll up and down nearly at the same time
     // read scroll down and scroll up in a queue event
-    m_egameState = none;
+    m_equeueGameStates.pushBack(none);
     for (int i = 0; i < count; i++) {
         scrollEverythingUp(GRID_H);
         int r = std::rand() % (GRID_W - 1);
@@ -645,7 +650,7 @@ Board::receiveLinesFromOpponent(int count)
         }
         m_argrid[GRID_H - 1][r] = NOTHING_IN_SQUARE;
     }
-    m_egameState = scrollDown;
+    m_equeueGameStates.pushBack(scrollDown);
 }
 
 void

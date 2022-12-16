@@ -374,6 +374,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\audioStream.cpp" />
     <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\menu.cpp" />
     <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\ia.cpp" />
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\gameStatesQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\ZERO_CHECK.vcxproj">

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "board.h"
-
 struct Pos
 {
     int row, col;
@@ -11,3 +9,15 @@ struct Pos
 };
 
 typedef Pos Pos;
+
+enum GameState
+{
+    none,
+    scrollDown,
+    rotate,
+    scrollRight,
+    scrollLeft,
+    scrollLine,
+    gameOver,
+    undefined
+};
