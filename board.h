@@ -250,7 +250,9 @@ class Board
     bool checkIfCurrentRightShiftShapeCollide();
     void freezeCurrentShape();
     bool removesFullLines();
+    void receiveLinesFromOpponent(int count);
     void scrollEverythingDown(int fromLine);
+    void scrollEverythingUp(int fromLine);
     void right();
     void left();
     void accelerate();
@@ -262,7 +264,7 @@ class Board
     void drawLevel();
     void drawScore();
     void updateGhost();
-    void youLoose();
+    void looser(bool isHumanLoose);
     void playIntro();
     void downSpecifics();
     tt::rect locateCurrentShape();

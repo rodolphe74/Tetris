@@ -241,6 +241,9 @@ main()
         }
 
         if (menuStep == SELECTION_MADE) {
+
+            // Board render && keyboard check game loop
+            // Two cases : only human or computer vs human
             if (gameMode == GAME_HUMAN_ALONE) {
                 humanBoard->m_boolAutoplay = false;
                 humanBoard->checkKeyboard();
@@ -249,6 +252,11 @@ main()
                   WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
                   countFrames,
                   FRAME_RATE);
+
+                // gameover ?
+                if (humanBoard->m_egameState == gameOver) {
+                    humanBoard->looser(true);
+                }
             } else {
                 // GAME_HUMAN_VS_COMPUTER
                 humanBoard->m_boolAutoplay = false;
@@ -266,16 +274,31 @@ main()
                   countFrames,
                   FRAME_RATE);
 
-                // send lines to the opponent ?
+                // send lines to the opponent in 2 players mode ?
                 if (humanBoard->m_icountScrolledDown > 1) {
-                    printf("send lines to computer :%d\n",
+                    printf("##################### send lines to computer :%d "
+                           "#####################\n",
                            humanBoard->m_icountScrolledDown - 1);
+                    computerBoard->receiveLinesFromOpponent(
+                      humanBoard->m_icountScrolledDown - 1);
                     humanBoard->m_icountScrolledDown = 0;
                 }
                 if (computerBoard->m_icountScrolledDown > 1) {
-                    printf("send lines to human :%d\n",
+                    printf("##################### send lines to human :%d "
+                           "#####################\n",
                            computerBoard->m_icountScrolledDown - 1);
+                    humanBoard->receiveLinesFromOpponent(
+                      computerBoard->m_icountScrolledDown - 1);
                     computerBoard->m_icountScrolledDown = 0;
+                }
+
+                // Check if one player is gameOver
+                if (humanBoard->m_egameState == gameOver) {
+                    computerBoard->m_egameState = none;
+                    humanBoard->looser(true);
+                } else if (computerBoard->m_egameState == gameOver) {
+                    humanBoard->m_egameState = none;
+                    computerBoard->looser(false);
                 }
             }
         }

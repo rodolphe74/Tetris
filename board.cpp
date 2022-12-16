@@ -308,7 +308,6 @@ Board::render(float shiftLeft,
             //        m_ftimeMultiplier);
 
             m_soundExplode.play();
-            // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
             m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_egameState = scrollDown;
             m_boolonceLineSound = false;
@@ -330,11 +329,6 @@ Board::render(float shiftLeft,
         m_egameState != gameOver && m_egameState != none) {
         iaMoveThread();
         m_waitNextTurn = true;
-    }
-
-    if (m_egameState == gameOver) {
-        m_waitNextTurn = true;
-        youLoose();
     }
 
     if (framesCount == frameRate * 1000) {
@@ -405,6 +399,14 @@ Board::checkKeyboard()
     // if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) && m_boolshouldIa) {
     //     m_boolshouldIa = false;
     // }
+
+    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) && !m_boolshouldIa) {
+    //    receiveLinesFromOpponent(1);
+    //    m_boolshouldIa = true;
+    //}
+    //if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) && m_boolshouldIa) {
+    //    m_boolshouldIa = false;
+    //}
 }
 
 void
@@ -629,12 +631,63 @@ Board::removesFullLines()
 }
 
 void
+Board::receiveLinesFromOpponent(int count)
+{
+    // TODO: How to do when 2 states at the same time
+    // ie : scroll up and down nearly at the same time
+    // read scroll down and scroll up in a queue event
+    m_egameState = none;
+    for (int i = 0; i < count; i++) {
+        scrollEverythingUp(GRID_H);
+        int r = std::rand() % (GRID_W - 1);
+        for (int x = 0; x < GRID_W; x++) {
+            m_argrid[GRID_H - 1][x] = SOMETHING_IN_SQUARE;
+        }
+        m_argrid[GRID_H - 1][r] = NOTHING_IN_SQUARE;
+    }
+    m_egameState = scrollDown;
+}
+
+void
 Board::scrollEverythingDown(int fromLine)
 {
     for (int y = fromLine - 1; y >= 0; y--) {
         for (int x = 0; x < GRID_W; x++) {
             m_argrid[y + 1][x] = m_argrid[y][x];
         }
+    }
+}
+
+void
+Board::scrollEverythingUp(int fromLine)
+{
+    bool freeze = false;
+    for (int y = 1; y < fromLine; y++) {
+        for (int x = 0; x < GRID_W; x++) {
+            m_argrid[y - 1][x] = m_argrid[y][x];
+            // TODO test if current shape collide
+            if (m_argrid[y - 1][x] == SOMETHING_IN_SQUARE &&
+                m_arshape[y - 1][x] == SHAPE_IN_SQUARE) {
+                freeze = true;
+            }
+        }
+    }
+
+    if (freeze) {
+        // Specific case : when going upward, shape can freeze in new line
+        // Avoided by putting the current shape one row up.
+        clearCurrentShape();
+        setCurrentShape(m_currentShape,
+                        m_currentShapeRow - 1,
+                        m_currentShapeCol,
+                        m_currentShapeRotation);
+        freezeCurrentShape();
+
+        setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
+        findCurrentBottomShiftShape();
+        m_ftimeMultiplier = getCurrentLevelMultiplier();
+        m_boolAllowedTimeStarted = false;
+        m_boolCanAccelerate = false;
     }
 }
 
@@ -692,8 +745,6 @@ Board::accelerate()
 void
 Board::normalSpeed()
 {
-    // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
-    // m_ftimeMultiplier = getNextLevelMultiplier();
     m_ftimeMultiplier = getCurrentLevelMultiplier();
 }
 
@@ -947,10 +998,16 @@ Board::updateGhost()
 }
 
 void
-Board::youLoose()
+Board::looser(bool isHumanLoose)
 {
+    m_waitNextTurn = true;
     sf::Text youLoose;
-    youLoose.setString("You loose !");
+
+    if (isHumanLoose)
+        youLoose.setString("You loose !");
+    else
+        youLoose.setString("Computer loose !");
+    
     youLoose.setCharacterSize(30);
     youLoose.setFont(m_gameFont);
     sf::FloatRect fr = youLoose.getGlobalBounds();
@@ -1054,7 +1111,6 @@ Board::iaMoveThread()
         m_moveComputerThreadAllocated = true;
         m_moveComputerThread = new sf::Thread([this]() {
             m_bisComputerMoving = true;
-            /*m_moveComputerThreadAllocated = true;*/
             Ia::searchCount = 0;
             Pos posIa = Ia::findBestPosition(m_argrid,
                                              m_ishapesQueue,
