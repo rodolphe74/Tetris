@@ -1,16 +1,16 @@
 #include "fire.h"
 #include <math.h>
 
-std::vector<Fire*> Fire::allocatedFires;
+std::vector<Fire*> Fire::m_vecallocatedFires;
 
 Fire::Fire()
 {
-    // generate the palette
+    // generate the m_arcolorPalette
     sf::Color color;
     for (int x = 0; x < 256; x++) {
         // color = hsv(x / 3, 255, (float)std::min(255, x * 2));
         color = sf::Color(0, x, std::min(255, x * 2));
-        palette[x] = color;
+        m_arcolorPalette[x] = color;
     }
 }
 
@@ -81,79 +81,79 @@ Fire::addFire(uint32_t x, uint32_t y, uint32_t w, uint32_t h, int lifetime)
 
     for (uint32_t y = 0; y < f->m_ih; y++)
         for (uint32_t x = 0; x < f->m_iw; x++)
-            f->fire[y][x] = 0;
+            f->m_iarfire[y][x] = 0;
 
-    f->bufferTexture = new sf::Texture();
-    f->bufferTexture->create(f->m_iw, f->m_ih);
+    f->m_bufferTexture = new sf::Texture();
+    f->m_bufferTexture->create(f->m_iw, f->m_ih);
 
     f->m_ilife = lifetime;
-    f->readyForRemoving = false;
+    f->m_boolreadyForRemoving = false;
 
-    allocatedFires.push_back(f);
+    m_vecallocatedFires.push_back(f);
 }
 
 void
 Fire::freeAllocatedTexture()
 {
     m_ilife = -1;
-    delete bufferTexture;
+    delete m_bufferTexture;
 }
 
 void
 Fire::freeExtinguishedFires()
 {
-    for (std::vector<Fire*>::iterator f = allocatedFires.begin();
-         f != allocatedFires.end();
+    for (std::vector<Fire*>::iterator f = m_vecallocatedFires.begin();
+         f != m_vecallocatedFires.end();
          f++) {
-        if ((*f)->m_ilife < 0 && !(*f)->readyForRemoving) {
+        if ((*f)->m_ilife < 0 && !(*f)->m_boolreadyForRemoving) {
             (*f)->m_ilife = -1;
             (*f)->freeAllocatedTexture();
-            (*f)->readyForRemoving = true;
+            (*f)->m_boolreadyForRemoving = true;
         }
     }
 
     std::vector<Fire*> newAllocatedFires;
-    for (std::vector<Fire*>::iterator f = allocatedFires.begin();
-         f != allocatedFires.end();
+    for (std::vector<Fire*>::iterator f = m_vecallocatedFires.begin();
+         f != m_vecallocatedFires.end();
          f++) {
-        if (!(*f)->readyForRemoving)
+        if (!(*f)->m_boolreadyForRemoving)
             newAllocatedFires.push_back(*f);
     }
 
-    allocatedFires.clear();
-    allocatedFires = newAllocatedFires;
+    m_vecallocatedFires.clear();
+    m_vecallocatedFires = newAllocatedFires;
 }
 
 void
 Fire::freeBurningFires()
 {
-    for (std::vector<Fire*>::iterator f = allocatedFires.begin();
-         f != allocatedFires.end();
+    for (std::vector<Fire*>::iterator f = m_vecallocatedFires.begin();
+         f != m_vecallocatedFires.end();
          f++) {
-        if ((*f)->m_ilife >= 0 && !(*f)->readyForRemoving) {
+        if ((*f)->m_ilife >= 0 && !(*f)->m_boolreadyForRemoving) {
             (*f)->m_ilife = -1;
             (*f)->freeAllocatedTexture();
-            (*f)->readyForRemoving = true;
+            (*f)->m_boolreadyForRemoving = true;
         }
     }
 
     std::vector<Fire*> newAllocatedFires;
-    for (std::vector<Fire*>::iterator f = allocatedFires.begin();
-         f != allocatedFires.end();
+    for (std::vector<Fire*>::iterator f = m_vecallocatedFires.begin();
+         f != m_vecallocatedFires.end();
          f++) {
-        if (!(*f)->readyForRemoving)
+        if (!(*f)->m_boolreadyForRemoving)
             newAllocatedFires.push_back(*f);
     }
 
-    allocatedFires.clear();
-    allocatedFires = newAllocatedFires;
+    m_vecallocatedFires.clear();
+    m_vecallocatedFires = newAllocatedFires;
 }
 
 void
 Fire::nextFrame(int& frameCount)
 {
-    for (std::vector<Fire*>::iterator f = allocatedFires.begin();
-         f != allocatedFires.end();
+    for (std::vector<Fire*>::iterator f = m_vecallocatedFires.begin();
+         f != m_vecallocatedFires.end();
          f++) {
 
         if ((*f)->m_ilife < 0)
@@ -161,35 +161,35 @@ Fire::nextFrame(int& frameCount)
 
         // bevelling sides
         int modh = (*f)->m_ih + 1;
-        (*f)->bufferImage = new sf::Image();
-        *(*f)->bufferImage = (*f)->bufferTexture->copyToImage();
+        (*f)->m_bufferImage = new sf::Image();
+        *(*f)->m_bufferImage = (*f)->m_bufferTexture->copyToImage();
         float dtr =
           -exp(abs(.5f * ((*f)->m_ilife - FIRE_TIME)) - FIRE_TIME / 2.0f) + 1;
-        (*f)->middley = ((*f)->m_ih - 1) / 2.0f;
-        (*f)->stepy = 255.0f / (*f)->m_ih;
-        (*f)->middlex = ((*f)->m_iw - 1) / 2.0f;
+        (*f)->m_fmiddley = ((*f)->m_ih - 1) / 2.0f;
+        (*f)->m_fstepy = 255.0f / (*f)->m_ih;
+        (*f)->m_fmiddlex = ((*f)->m_iw - 1) / 2.0f;
 
-        // compute fire only when it is alive
+        // compute m_iarfire only when it is alive
         if (dtr >= 0.0f) {
 
-            // randomize the bottom row of the fire buffer
+            // randomize the bottom row of the m_iarfire buffer
             for (uint32_t x = 0; x < (*f)->m_iw; x++)
-                (*f)->fire[(*f)->m_ih][x] = abs(32768 + rand()) % 256;
+                (*f)->m_iarfire[(*f)->m_ih][x] = abs(32768 + rand()) % 256;
 
             // yinc inc in every frame animation speed
             static const int yinc = 2;
 
-            // do the fire calculations for every pixel, from top to bottom
+            // do the m_iarfire calculations for every pixel, from top to bottom
             for (int i = 0; i < yinc; i++) {
                 for (uint32_t y = 0; y < (*f)->m_ih /*- 1*/; y++) {
                     for (uint32_t x = 0; x < (*f)->m_iw; x++) {
-                        (*f)->fire[y][x] =
-                          (((*f)->fire[(y + 1) % modh]
+                        (*f)->m_iarfire[y][x] =
+                          (((*f)->m_iarfire[(y + 1) % modh]
                                       [(x - 1 + (*f)->m_iw) % (*f)->m_iw] +
-                            (*f)->fire[(y + 1) % modh][(x) % (*f)->m_iw] +
-                            (*f)->fire[(y + 1) % (*f)->m_ih]
+                            (*f)->m_iarfire[(y + 1) % modh][(x) % (*f)->m_iw] +
+                            (*f)->m_iarfire[(y + 1) % (*f)->m_ih]
                                       [(x + 1) % (*f)->m_iw] +
-                            (*f)->fire[(y + 2) % modh][(x) % (*f)->m_iw]) *
+                            (*f)->m_iarfire[(y + 2) % modh][(x) % (*f)->m_iw]) *
                            32) /
                           129;
                     }
@@ -198,31 +198,30 @@ Fire::nextFrame(int& frameCount)
 
             // feed the buffered image with the previous buffer
             for (uint32_t y = 0; y < (*f)->m_ih; y++) {
-                int yy = (int)(y - (*f)->middley);
-                (*f)->alphay = -exp(abs(yy * .33f) - (*f)->middley / 3.0f) + 1;
-                (*f)->alphay *= 255.0f;
+                int yy = (int)(y - (*f)->m_fmiddley);
+                (*f)->m_falphay = -exp(abs(yy * .33f) - (*f)->m_fmiddley / 3.0f) + 1;
+                (*f)->m_falphay *= 255.0f;
                 for (uint32_t x = 0; x < (*f)->m_iw; x++) {
-                    int xx = (int)(x - (*f)->middlex);
-                    (*f)->dx = -exp(abs(xx * .10f) - (*f)->middlex / 10.0f) + 1;
-                    (*f)->dxr = 0.0f;
-                    (*f)->alpha = (uint8_t)(dtr * (*f)->alphay * (*f)->dx);
+                    int xx = (int)(x - (*f)->m_fmiddlex);
+                    (*f)->m_fdx = -exp(abs(xx * .10f) - (*f)->m_fmiddlex / 10.0f) + 1;
+                    (*f)->m_ialpha = (uint8_t)(dtr * (*f)->m_falphay * (*f)->m_fdx);
 
-                    sf::Color c((*f)->palette[(*f)->fire[y][x]].r,
-                                (*f)->palette[(*f)->fire[y][x]].g,
-                                (*f)->palette[(*f)->fire[y][x]].b,
-                                (*f)->alpha);
+                    sf::Color c((*f)->m_arcolorPalette[(*f)->m_iarfire[y][x]].r,
+                                (*f)->m_arcolorPalette[(*f)->m_iarfire[y][x]].g,
+                                (*f)->m_arcolorPalette[(*f)->m_iarfire[y][x]].b,
+                                (*f)->m_ialpha);
 
                     if ((*f)->getL(c) < 32) {
                         // nothing when lum < 32
                     } else {
-                        (*f)->bufferImage->setPixel(x, y, c);
+                        (*f)->m_bufferImage->setPixel(x, y, c);
                     }
                 }
             }
         }
 
-        (*f)->bufferTexture->loadFromImage(*(*f)->bufferImage);
-        delete (*f)->bufferImage;
+        (*f)->m_bufferTexture->loadFromImage(*(*f)->m_bufferImage);
+        delete (*f)->m_bufferImage;
 
         (*f)->m_ilife--;
     }
@@ -231,14 +230,14 @@ Fire::nextFrame(int& frameCount)
 void
 Fire::render(sf::RenderWindow& window)
 {
-    for (std::vector<Fire*>::iterator f = allocatedFires.begin();
-         f != allocatedFires.end();
+    for (std::vector<Fire*>::iterator f = m_vecallocatedFires.begin();
+         f != m_vecallocatedFires.end();
          f++) {
 
         if ((*f)->m_ilife < 0)
             continue;
 
-        sf::Sprite sprite(*(*f)->bufferTexture);
+        sf::Sprite sprite(*(*f)->m_bufferTexture);
         sprite.setPosition((float)(*f)->m_ix, (float)(*f)->m_iy);
         window.draw(sprite);
     }

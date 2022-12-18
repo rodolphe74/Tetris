@@ -8,29 +8,28 @@
 
 // define the width and height of the screen and the buffers
 const int screenWidth = 640;
-const int screenHeight = 100;
+const int screenHeight = 96;
 
 class Fire
 {
   private:
     // Y-coordinate first because we use horizontal scanlines
-    uint32_t fire[screenHeight][screenWidth] = {};
+    uint32_t m_iarfire[screenHeight][screenWidth] = {};
 
-    // this buffer will contain the fire
+    // this buffer will contain the m_iarfire
     // uint32_t buffer[screenHeight][screenWidth];
-    sf::Texture* bufferTexture = NULL;
-    sf::Image* bufferImage = NULL;
+    sf::Texture* m_bufferTexture = NULL;
+    sf::Image* m_bufferImage = NULL;
 
     // this is the buffer to be
     // drawn to the screen
-    sf::Color palette[256]; // this will contain the color palette
-    int oldFrameCount = 0;
+    sf::Color m_arcolorPalette[256]; // this will contain the color m_arcolorPalette
     int m_ilife = -1;
-    bool readyForRemoving = false;
+    bool m_boolreadyForRemoving = false;
     uint32_t m_ix = 0, m_iy = 0, m_ih = screenHeight - 1, m_iw = screenWidth;
-    float stepy = 0, middley = 0, middlex = 0, dx = 0, dxr = 0, alphay = 0;
-    uint8_t alpha = 0;
-    static std::vector<Fire*> allocatedFires;
+    float m_fstepy = 0, m_fmiddley = 0, m_fmiddlex = 0, m_fdx = 0, m_falphay = 0;
+    uint8_t m_ialpha = 0;
+    static std::vector<Fire*> m_vecallocatedFires;
 
   public:
     Fire();

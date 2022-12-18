@@ -281,7 +281,7 @@ main()
                   countFrames,
                   FRAME_RATE);
 
-                // Check fire deallocation
+                // Check m_iarfire deallocation
                 Fire::freeExtinguishedFires();
 
                 //if (countFrames == 400) {
@@ -313,7 +313,7 @@ main()
 
 
 
-                // Render fire if needed
+                // Render m_iarfire if needed
                 Fire::nextFrame(countFrames);
                 Fire::render(*window);
 
