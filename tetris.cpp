@@ -149,6 +149,9 @@ init()
 void
 freeAndExit()
 {
+    Fire::freeBurningFires();
+    Fire::freeExtinguishedFires();
+
     computerBoard->m_equeueGameStates.pushBack(none);
     computerBoard->freeAutoplayThread();
     stopCurrentAudioStream();
@@ -204,6 +207,10 @@ main()
                         event.key.code == sf::Keyboard::Right)
                         humanBoard->m_boolOnceMoveSound = true;
                     menu->m_boolcanSound = true;
+
+                    if (event.key.code == sf::Keyboard::F) {
+                        Fire::addFire(10, 10, 100, 32, FIRE_TIME);
+                    }
                     break;
 
                 case sf::Event::Resized:
@@ -273,6 +280,42 @@ main()
                   WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
                   countFrames,
                   FRAME_RATE);
+
+                // Check fire deallocation
+                Fire::freeExtinguishedFires();
+
+                //if (countFrames == 400) {
+                //    Fire::addFire(
+                //      WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                //      WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                //      GRID_W * PIXEL_SQUARE_SIZE,
+                //      1 * PIXEL_SQUARE_SIZE,
+                //      FIRE_TIME);
+                //}
+
+                //if (countFrames == 410) {
+                //    Fire::addFire(
+                //      WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                //      WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2 + 60,
+                //      GRID_W * PIXEL_SQUARE_SIZE,
+                //      1 * PIXEL_SQUARE_SIZE,
+                //      FIRE_TIME);
+                //}
+
+                //if (countFrames == 420) {
+                //    Fire::addFire(
+                //      WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                //      WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2 + 120,
+                //      GRID_W * PIXEL_SQUARE_SIZE,
+                //      1 * PIXEL_SQUARE_SIZE,
+                //      FIRE_TIME);
+                //}
+
+
+
+                // Render fire if needed
+                Fire::nextFrame(countFrames);
+                Fire::render(*window);
 
                 // send lines to the opponent in 2 players mode ?
                 if (humanBoard->m_icountScrolledDown > 1) {

@@ -4,6 +4,7 @@
 #include "audioStream.h"
 #include "board.h"
 #include "menu.h"
+#include "fire.h"
 #include "particles.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -51,6 +52,7 @@ static Board* humanBoard = NULL;
 static Board* computerBoard = NULL;
 static AnimatedBackground* background;
 static Particles particles;
+static Fire fire;
 static Menu* menu;
 static sf::Font gameFont;
 static int counter = -1;
