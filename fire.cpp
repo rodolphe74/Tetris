@@ -78,10 +78,14 @@ Fire::addFire(uint32_t x, uint32_t y, uint32_t w, uint32_t h, int lifetime)
     f->m_iy = y;
     f->m_iw = w;
     f->m_ih = h;
+    f->m_iarfire =
+      new uint32_t[w * (h + 2)]; // +2 since iterations in buffer go further
+                                 // than texture height in nextFrame m_iarfire
+                                 // calculations loop
 
     for (uint32_t y = 0; y < f->m_ih; y++)
         for (uint32_t x = 0; x < f->m_iw; x++)
-            f->m_iarfire[y][x] = 0;
+            f->m_iarfire[f->getOffset(y, x)] = 0;
 
     f->m_bufferTexture = new sf::Texture();
     f->m_bufferTexture->create(f->m_iw, f->m_ih);
@@ -93,10 +97,11 @@ Fire::addFire(uint32_t x, uint32_t y, uint32_t w, uint32_t h, int lifetime)
 }
 
 void
-Fire::freeAllocatedTexture()
+Fire::freeAllocatedBufferAndTexture()
 {
     m_ilife = -1;
     delete m_bufferTexture;
+    delete[] m_iarfire;
 }
 
 void
@@ -107,7 +112,7 @@ Fire::freeExtinguishedFires()
          f++) {
         if ((*f)->m_ilife < 0 && !(*f)->m_boolreadyForRemoving) {
             (*f)->m_ilife = -1;
-            (*f)->freeAllocatedTexture();
+            (*f)->freeAllocatedBufferAndTexture();
             (*f)->m_boolreadyForRemoving = true;
         }
     }
@@ -132,7 +137,7 @@ Fire::freeBurningFires()
          f++) {
         if ((*f)->m_ilife >= 0 && !(*f)->m_boolreadyForRemoving) {
             (*f)->m_ilife = -1;
-            (*f)->freeAllocatedTexture();
+            (*f)->freeAllocatedBufferAndTexture();
             (*f)->m_boolreadyForRemoving = true;
         }
     }
@@ -174,22 +179,26 @@ Fire::nextFrame(int& frameCount)
 
             // randomize the bottom row of the m_iarfire buffer
             for (uint32_t x = 0; x < (*f)->m_iw; x++)
-                (*f)->m_iarfire[(*f)->m_ih][x] = abs(32768 + rand()) % 256;
+                (*f)->m_iarfire[(*f)->getOffset((*f)->m_ih, x)] =
+                  abs(32768 + rand()) % 256;
 
             // yinc inc in every frame animation speed
             static const int yinc = 2;
 
             // do the m_iarfire calculations for every pixel, from top to bottom
             for (int i = 0; i < yinc; i++) {
-                for (uint32_t y = 0; y < (*f)->m_ih /*- 1*/; y++) {
+                for (uint32_t y = 0; y < (*f)->m_ih; y++) {
                     for (uint32_t x = 0; x < (*f)->m_iw; x++) {
-                        (*f)->m_iarfire[y][x] =
-                          (((*f)->m_iarfire[(y + 1) % modh]
-                                      [(x - 1 + (*f)->m_iw) % (*f)->m_iw] +
-                            (*f)->m_iarfire[(y + 1) % modh][(x) % (*f)->m_iw] +
-                            (*f)->m_iarfire[(y + 1) % (*f)->m_ih]
-                                      [(x + 1) % (*f)->m_iw] +
-                            (*f)->m_iarfire[(y + 2) % modh][(x) % (*f)->m_iw]) *
+                        (*f)->m_iarfire[(*f)->getOffset(y, x)] =
+                          (((*f)->m_iarfire[(*f)->getOffset(
+                              (y + 1) % modh,
+                              (x - 1 + (*f)->m_iw) % (*f)->m_iw)] +
+                            (*f)->m_iarfire[(*f)->getOffset((y + 1) % modh,
+                                                            (x) % (*f)->m_iw)] +
+                            (*f)->m_iarfire[(*f)->getOffset(
+                              (y + 1) % (*f)->m_ih, (x + 1) % (*f)->m_iw)] +
+                            (*f)->m_iarfire[(*f)->getOffset(
+                              (y + 2) % modh, (x) % (*f)->m_iw)]) *
                            32) /
                           129;
                     }
@@ -199,17 +208,30 @@ Fire::nextFrame(int& frameCount)
             // feed the buffered image with the previous buffer
             for (uint32_t y = 0; y < (*f)->m_ih; y++) {
                 int yy = (int)(y - (*f)->m_fmiddley);
-                (*f)->m_falphay = -exp(abs(yy * .33f) - (*f)->m_fmiddley / 3.0f) + 1;
+                (*f)->m_falphay =
+                  -exp(abs(yy * .33f) - (*f)->m_fmiddley / 3.0f) + 1;
                 (*f)->m_falphay *= 255.0f;
                 for (uint32_t x = 0; x < (*f)->m_iw; x++) {
                     int xx = (int)(x - (*f)->m_fmiddlex);
-                    (*f)->m_fdx = -exp(abs(xx * .10f) - (*f)->m_fmiddlex / 10.0f) + 1;
-                    (*f)->m_ialpha = (uint8_t)(dtr * (*f)->m_falphay * (*f)->m_fdx);
+                    (*f)->m_fdx =
+                      -exp(abs(xx * .10f) - (*f)->m_fmiddlex / 10.0f) + 1;
+                    (*f)->m_ialpha =
+                      (uint8_t)(dtr * (*f)->m_falphay * (*f)->m_fdx);
 
-                    sf::Color c((*f)->m_arcolorPalette[(*f)->m_iarfire[y][x]].r,
-                                (*f)->m_arcolorPalette[(*f)->m_iarfire[y][x]].g,
-                                (*f)->m_arcolorPalette[(*f)->m_iarfire[y][x]].b,
-                                (*f)->m_ialpha);
+                    sf::Color c(
+                      (*f)
+                        ->m_arcolorPalette[(*f)
+                                             ->m_iarfire[(*f)->getOffset(y, x)]]
+                        .r,
+                      (*f)
+                        ->m_arcolorPalette[(*f)
+                                             ->m_iarfire[(*f)->getOffset(y, x)]]
+                        .g,
+                      (*f)
+                        ->m_arcolorPalette[(*f)
+                                             ->m_iarfire[(*f)->getOffset(y, x)]]
+                        .b,
+                      (*f)->m_ialpha);
 
                     if ((*f)->getL(c) < 32) {
                         // nothing when lum < 32
