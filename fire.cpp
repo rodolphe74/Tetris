@@ -235,6 +235,8 @@ Fire::nextFrame(int& frameCount)
 
                     if ((*f)->getL(c) < 32) {
                         // nothing when lum < 32
+                        (*f)->m_bufferImage->setPixel(
+                          x, y, sf::Color(0, 0, 0, 0));
                     } else {
                         (*f)->m_bufferImage->setPixel(x, y, c);
                     }

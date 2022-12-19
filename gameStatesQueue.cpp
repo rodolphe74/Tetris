@@ -1,4 +1,5 @@
 #include "gameStatesQueue.h"
+#include <stdio.h>
 
 GameState
 GameStatesQueue::popFront()
@@ -32,7 +33,8 @@ GameStatesQueue::pushBack(GameState gs)
 void
 GameStatesQueue::debugQueueSize()
 {
-    size_t qs = m_queueStates.size();
+    int qs = (int) m_queueStates.size();
     if (qs > 0)
-        printf("Game states size:%llu (%d-%d)\n", qs, countEnqueue, countDequeue);
+        printf(
+          "Game states size:%d (%d-%d)\n", qs, countEnqueue, countDequeue);
 }
