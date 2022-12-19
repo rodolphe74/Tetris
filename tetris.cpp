@@ -284,35 +284,6 @@ main()
                 // Check m_iarfire deallocation
                 Fire::freeExtinguishedFires();
 
-                //if (countFrames == 400) {
-                //    Fire::addFire(
-                //      WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
-                //      WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
-                //      GRID_W * PIXEL_SQUARE_SIZE,
-                //      1 * PIXEL_SQUARE_SIZE,
-                //      FIRE_TIME);
-                //}
-
-                //if (countFrames == 410) {
-                //    Fire::addFire(
-                //      WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
-                //      WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2 + 60,
-                //      GRID_W * PIXEL_SQUARE_SIZE,
-                //      1 * PIXEL_SQUARE_SIZE,
-                //      FIRE_TIME);
-                //}
-
-                //if (countFrames == 420) {
-                //    Fire::addFire(
-                //      WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
-                //      WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2 + 120,
-                //      GRID_W * PIXEL_SQUARE_SIZE,
-                //      1 * PIXEL_SQUARE_SIZE,
-                //      FIRE_TIME);
-                //}
-
-
-
                 // Render m_iarfire if needed
                 Fire::nextFrame(countFrames);
                 Fire::render(*window);
