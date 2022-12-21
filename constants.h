@@ -22,7 +22,7 @@
 #define LINE_TIME_MS 100
 #define STICKY_TIME_MS 1000
 #define SHAPES_QUEUE_SIZE 6
-#define FIRE_TIME 20
+#define FIRE_TIME 40
 
 constexpr float BORDER_W_MULT = 1.70f;
 constexpr float BORDER_H_MULT = 1.03f;
@@ -56,6 +56,6 @@ constexpr float QUICK_TIME_MULTIPLIER = 0.08f;
 constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;
 
 constexpr int SLEEP_TIME_BETWEEN_EVERY_MOVE_MS = 200;
-constexpr int AUTOPLAY_DEPTH = 3;
+constexpr int AUTOPLAY_DEPTH = 4;
 
 constexpr int64_t SAFETY_ALLOWANCE_DEALLOCATION_TIME_MS = 1000;

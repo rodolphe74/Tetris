@@ -1,6 +1,7 @@
 #include "tetris.h"
 #include "animatedBackground.h"
 #include "constants.h"
+#include "fire.h"
 
 void
 playThemeOne()
@@ -208,9 +209,9 @@ main()
                         humanBoard->m_boolOnceMoveSound = true;
                     menu->m_boolcanSound = true;
 
-                    if (event.key.code == sf::Keyboard::F) {
-                        Fire::addFire(10, 10, 100, 32, FIRE_TIME);
-                    }
+                    //if (event.key.code == sf::Keyboard::F) {
+                    //    Fire::addFire(10, 10, 100, 32, FIRE_TIME);
+                    //}
                     break;
 
                 case sf::Event::Resized:
@@ -260,6 +261,13 @@ main()
                   countFrames,
                   FRAME_RATE);
 
+                //// Check m_iarfire deallocation
+                //Fire::freeExtinguishedFires();
+
+                //// Render m_iarfire if needed
+                //Fire::nextFrame(countFrames);
+                //Fire::render(*window);
+
                 // gameover ?
                 if (humanBoard->m_ecurrentGameState == gameOver) {
                     // Keeping only gameOver gameState in the queue
@@ -272,7 +280,7 @@ main()
                 humanBoard->m_equeueGameStates.sweepFinishedThreads();
             } else {
                 // GAME_HUMAN_VS_COMPUTER
-                humanBoard->m_boolAutoplay = false/*true*/;
+                humanBoard->m_boolAutoplay = false /*true*/;
                 humanBoard->checkKeyboard();
                 humanBoard->render(
                   3 * (WINDOW_W / 4) - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
@@ -287,12 +295,12 @@ main()
                   countFrames,
                   FRAME_RATE);
 
-                // Check m_iarfire deallocation
-                Fire::freeExtinguishedFires();
+                //// Check m_iarfire deallocation
+                //Fire::freeExtinguishedFires();
 
-                // Render m_iarfire if needed
-                Fire::nextFrame(countFrames);
-                Fire::render(*window);
+                //// Render m_iarfire if needed
+                //Fire::nextFrame(countFrames);
+                //Fire::render(*window);
 
                 // send lines to the opponent in 2 players mode ?
                 if (humanBoard->m_icountScrolledDown > 1) {

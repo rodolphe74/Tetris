@@ -1,4 +1,5 @@
 #include "board.h"
+#include "fire.h"
 #include "globals.h"
 #include "ia.h"
 #include "shapes.h"
@@ -197,6 +198,13 @@ Board::render(float shiftLeft,
     // Fog to draw ?
     m_fog.moveFog();
     m_fog.renderFog(*m_prenderWindow);
+
+    // Fire to draw ?
+    // Check m_iarfire deallocation
+    Fire::freeExtinguishedFires();
+    // Render m_iarfire if needed
+    Fire::nextFrame(framesCount);
+    Fire::render(*m_prenderWindow);
 
     // Game states
     if (m_ecurrentGameState == scrollDown) {
@@ -687,8 +695,25 @@ Board::removeEmptyLines()
 void
 Board::receiveLinesFromOpponent(int count)
 {
+
+    // Add fire effect
+    Fire::addFire((uint32_t)m_currentShiftLeft - 6,
+                  (uint32_t)(m_currentShiftHeight) +
+                    PIXEL_SQUARE_SIZE * (GRID_H - count) - 4,
+                  GRID_W * PIXEL_SQUARE_SIZE + 12,
+                  PIXEL_SQUARE_SIZE * count + 6,
+                  FIRE_TIME * count);
+
     for (int i = 0; i < count; i++) {
         m_equeueGameStates.pushBack(scrollUp);
+
+        //// Add fire effect
+        // Fire::addFire((uint32_t)m_currentShiftLeft - 6,
+        //               (uint32_t)(m_currentShiftHeight) +
+        //                 PIXEL_SQUARE_SIZE * (GRID_H - count + i) - 4,
+        //               GRID_W * PIXEL_SQUARE_SIZE + 12,
+        //               PIXEL_SQUARE_SIZE * 1 + 6,
+        //               FIRE_TIME * 2);
     }
 }
 

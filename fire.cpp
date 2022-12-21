@@ -174,6 +174,9 @@ Fire::nextFrame(int& frameCount)
         (*f)->m_fstepy = 255.0f / (*f)->m_ih;
         (*f)->m_fmiddlex = ((*f)->m_iw - 1) / 2.0f;
 
+        // DEBUG
+        dtr = 1.0f;
+
         // compute m_iarfire only when it is alive
         if (dtr >= 0.0f) {
 
@@ -183,7 +186,7 @@ Fire::nextFrame(int& frameCount)
                   abs(32768 + rand()) % 256;
 
             // yinc inc in every frame animation speed
-            static const int yinc = 2;
+            static const int yinc = 1;
 
             // do the m_iarfire calculations for every pixel, from top to bottom
             for (int i = 0; i < yinc; i++) {
@@ -215,8 +218,12 @@ Fire::nextFrame(int& frameCount)
                     int xx = (int)(x - (*f)->m_fmiddlex);
                     (*f)->m_fdx =
                       -exp(abs(xx * .10f) - (*f)->m_fmiddlex / 10.0f) + 1;
+
+                    // DEBUG
                     (*f)->m_ialpha =
                       (uint8_t)(dtr * (*f)->m_falphay * (*f)->m_fdx);
+                    /*(*f)->m_ialpha =
+                      (uint8_t)(dtr * (*f)->m_falphay * (*f)->m_fdx);*/
 
                     sf::Color c(
                       (*f)
@@ -231,7 +238,7 @@ Fire::nextFrame(int& frameCount)
                         ->m_arcolorPalette[(*f)
                                              ->m_iarfire[(*f)->getOffset(y, x)]]
                         .b,
-                      (*f)->m_ialpha);
+                      (*f)->m_ialpha / 1.5f);
 
                     if ((*f)->getL(c) < 32) {
                         // nothing when lum < 32
