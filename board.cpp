@@ -88,8 +88,9 @@ Board::render(float shiftLeft,
 
     // Get game state
     m_equeueGameStates.debugQueueSize();
-    
+
     m_ecurrentGameState = m_equeueGameStates.popFront(m_ecurrentGameState);
+    // printf("GameState:%d\n", m_ecurrentGameState);
 
     for (int y = 0; y <= GRID_H; y++) {
         for (int x = 0; x <= GRID_W; x++) {
@@ -137,7 +138,7 @@ Board::render(float shiftLeft,
                    .asMilliseconds() > STICKY_TIME_MS) {
             // printf("Tu peux plus bouger !\n");
             freezeCurrentShape();
-            bool linesRemoved = removesFullLines();
+            bool linesRemoved = removeFullLines();
             // printf("linesRemoved:%d\n", linesRemoved);
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
@@ -163,7 +164,7 @@ Board::render(float shiftLeft,
 
             // printf("Tu peux plus bouger !\n");
             freezeCurrentShape();
-            bool linesRemoved = removesFullLines();
+            bool linesRemoved = removeFullLines();
             // printf("linesRemoved:%d\n", linesRemoved);
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
@@ -249,6 +250,7 @@ Board::render(float shiftLeft,
 
     // Check if full lines to remove
     if (m_ecurrentGameState == scrollLine) {
+        m_ishouldCollapse++;
         for (int y = 0; y < GRID_H; y++) {
             if (m_arlinesToRemove[y]) {
                 for (int x = 0; x < GRID_W; x++) {
@@ -265,6 +267,9 @@ Board::render(float shiftLeft,
                         PIXEL_SQUARE_SIZE / 2.0f - 1.0f);
                     line.setFillColor(sf::Color(255, 192, 192));
                     m_prenderWindow->draw(line);
+
+                    // next dequeue : keep scrollLine
+                    m_equeueGameStates.pushFront(scrollLine);
                 }
             }
         }
@@ -275,51 +280,63 @@ Board::render(float shiftLeft,
             m_boolonceLineSound = true;
         }
 
-        //  Wait a bit before scrolling lines down
+        if (m_ishouldCollapse == 1) {
+            // post a collapse state after a while
+            m_equeueGameStates.pushBackAfterAWhileInMs(
+              collapse, WAIT_BEFORE_SCROLLING_DOWN_MS);
+            m_equeueGameStates.pushFront(scrollDown); // normal game state
+        }
+    }
+
+    if (m_ecurrentGameState == collapse) {
+
+        removeEmptyLines();
+
         m_icountScrolledDown = 0;
-        if (m_waitClock.getElapsedTime().asMilliseconds() >
-            WAIT_BEFORE_SCROLLING_DOWN_MS) {
-            for (int y = 0; y < GRID_H; y++) {
-                if (m_arlinesToRemove[y]) {
-                    scrollEverythingDown(y);
-                    m_icountScrolledDown++;
-                    m_icountLines++;
-                    m_icountLinesPerLevel++;
-                    m_strcountLines = std::to_string(m_icountLines);
-                    m_boolparticlesLevel = true;
-                    if (m_icountLinesPerLevel > LINES_PER_LEVEL) {
-                        m_ilevel++;
-                        m_ftimeMultiplier = getNextLevelMultiplier();
-                        m_icountLinesPerLevel = 0;
-                        m_strlevel = std::to_string(m_ilevel);
-                    }
+        for (int y = 0; y < GRID_H; y++) {
+            if (m_arlinesToCollapse[y]) {
+                scrollEverythingDown(y);
+                m_icountScrolledDown++;
+                m_icountLines++;
+                m_icountLinesPerLevel++;
+                m_strcountLines = std::to_string(m_icountLines);
+                m_boolparticlesLevel = true;
+                if (m_icountLinesPerLevel > LINES_PER_LEVEL) {
+                    m_ilevel++;
+                    m_ftimeMultiplier = getNextLevelMultiplier();
+                    m_icountLinesPerLevel = 0;
+                    m_strlevel = std::to_string(m_ilevel);
                 }
             }
-            if (m_icountScrolledDown == 1) {
-                m_iscore += m_ilevel * 100;
-            } else if (m_icountScrolledDown == 2) {
-                m_iscore += m_ilevel * 300;
-            } else if (m_icountScrolledDown == 3) {
-                m_iscore += m_ilevel * 500;
-            } else if (m_icountScrolledDown == 4) {
-                m_iscore += m_ilevel * 800;
-            }
-            m_strscore = std::to_string(m_iscore);
-
-            // printf(">>>>>%d %d %d = %f\n",
-            //        m_ilevel,
-            //        m_icountLines,
-            //        m_icountLinesPerLevel,
-            //        m_ftimeMultiplier);
-
-            m_soundExplode.play();
-            m_ftimeMultiplier = getCurrentLevelMultiplier();
-            m_equeueGameStates.pushBack(scrollDown);
-            m_boolonceLineSound = false;
-            // in case of AUTOPLAY authorize computer to play next shape after
-            // lines scrolling down effect
-            m_waitNextTurn = false;
         }
+        if (m_icountScrolledDown == 1) {
+            m_iscore += m_ilevel * 100;
+        } else if (m_icountScrolledDown == 2) {
+            m_iscore += m_ilevel * 300;
+        } else if (m_icountScrolledDown == 3) {
+            m_iscore += m_ilevel * 500;
+        } else if (m_icountScrolledDown == 4) {
+            m_iscore += m_ilevel * 800;
+        }
+        m_strscore = std::to_string(m_iscore);
+
+        // printf(">>>>>%d %d %d = %f\n",
+        //        m_ilevel,
+        //        m_icountLines,
+        //        m_icountLinesPerLevel,
+        //        m_ftimeMultiplier);
+
+        m_soundExplode.play();
+        m_ftimeMultiplier = getCurrentLevelMultiplier();
+        m_boolonceLineSound = false;
+        // in case of AUTOPLAY authorize computer to play next shape after
+        // lines scrolling down effect
+        m_waitNextTurn = false;
+        m_equeueGameStates.pushBack(scrollDown);
+    }
+
+    if (m_ecurrentGameState == scrollUp) {
+        receiveLineFromeOpponent();
     }
 
     // shall we free some allocated resources
@@ -396,22 +413,16 @@ Board::checkKeyboard()
         m_boolshouldWarp = true;
     }
 
-    // if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) && !m_boolshouldIa) {
-    //     printf("IA\n");
-    //     iaMoveThread();
-    //     m_boolshouldIa = true;
-    // }
-    // if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) && m_boolshouldIa) {
-    //     m_boolshouldIa = false;
-    // }
-
-    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) && !m_boolshouldIa) {
-    //    receiveLinesFromOpponent(1);
-    //    m_boolshouldIa = true;
-    //}
-    //if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) && m_boolshouldIa) {
-    //    m_boolshouldIa = false;
-    //}
+    // DEBUG : add line to opponent
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) &&
+        !m_boolshouldAddLinesToOpponent) {
+        receiveLinesFromOpponent(4);
+        m_boolshouldAddLinesToOpponent = true;
+    }
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) &&
+        m_boolshouldAddLinesToOpponent) {
+        m_boolshouldAddLinesToOpponent = false;
+    }
 }
 
 void
@@ -585,7 +596,7 @@ Board::freezeCurrentShape()
 }
 
 bool
-Board::removesFullLines()
+Board::removeFullLines()
 {
     m_boolshouldWarp = false;
     memset(m_arlinesToRemove, 0, sizeof(m_arlinesToRemove));
@@ -620,6 +631,7 @@ Board::removesFullLines()
     if (isLinesToRemove == true) {
         // Add a wait effect before
         m_waitClock.restart();
+        m_ishouldCollapse = 0;
         m_equeueGameStates.pushBack(scrollLine);
         m_currentLineExtension = 0.0f;
         m_currentLineExtensionStep =
@@ -635,22 +647,64 @@ Board::removesFullLines()
     return isLinesToRemove;
 }
 
+bool
+Board::removeEmptyLines()
+{
+    memset(m_arlinesToCollapse, 0, sizeof(m_arlinesToCollapse));
+    int checkFromLine = 0;
+    for (int y = 0; y < GRID_H; y++) {
+        int somethingInLine = 0;
+        for (int x = 0; x < GRID_W; x++) {
+            if (m_argrid[y][x] == SOMETHING_IN_SQUARE) {
+                somethingInLine = 1;
+                break;
+            }
+        }
+        if (somethingInLine) {
+            checkFromLine = y;
+            break;
+        }
+    }
+
+    printf("Check from line %d\n", checkFromLine);
+
+    for (int y = checkFromLine; y < GRID_H; y++) {
+        int fullEmptyLine = 1;
+        for (int x = 0; x < GRID_W; x++) {
+            if (m_argrid[y][x] == SOMETHING_IN_SQUARE) {
+                fullEmptyLine = 0;
+                continue;
+            }
+        }
+        if (fullEmptyLine) {
+            m_arlinesToCollapse[y] = 1;
+        }
+    }
+
+    return false;
+}
+
 void
 Board::receiveLinesFromOpponent(int count)
 {
-    // TODO: How to do when 2 states at the same time
-    // ie : scroll up and down nearly at the same time
-    // read scroll down and scroll up in a queue event
-    m_equeueGameStates.pushBack(none);
     for (int i = 0; i < count; i++) {
-        scrollEverythingUp(GRID_H);
-        int r = std::rand() % (GRID_W - 1);
-        for (int x = 0; x < GRID_W; x++) {
-            m_argrid[GRID_H - 1][x] = SOMETHING_IN_SQUARE;
-        }
-        m_argrid[GRID_H - 1][r] = NOTHING_IN_SQUARE;
+        m_equeueGameStates.pushBack(scrollUp);
     }
+}
+
+void
+Board::receiveLineFromeOpponent()
+{
+    scrollEverythingUp(GRID_H);
+    int r = std::rand() % (GRID_W - 1);
+    for (int x = 0; x < GRID_W; x++) {
+        m_argrid[GRID_H - 1][x] = SOMETHING_IN_SQUARE;
+    }
+    m_argrid[GRID_H - 1][r] = NOTHING_IN_SQUARE;
     m_equeueGameStates.pushBack(scrollDown);
+
+    // double check (possible collapse when scrollup)
+    removeFullLines();
 }
 
 void
@@ -788,7 +842,7 @@ Board::warp()
         m_iscore += 9;
         m_strscore = std::to_string(m_iscore);
         freezeCurrentShape();
-        removesFullLines();
+        removeFullLines();
     }
 
     setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
@@ -915,35 +969,37 @@ Board::drawLevel()
 void
 Board::drawScore()
 {
-    sf::Text scoreText(m_strscore, m_gameFont, SCORE_FONT_SIZE);
-    float scoreWidth = scoreText.getLocalBounds().width;
-    scoreText.setFillColor(sf::Color::Black);
-    scoreText.setOutlineColor(sf::Color::White);
-    scoreText.setOutlineThickness(0.8f);
-    scoreText.setPosition(
+    m_textscore.setString(m_strscore);
+    float scoreWidth = m_textscore.getLocalBounds().width;
+    m_textscore.setFillColor(sf::Color::Black);
+    m_textscore.setOutlineColor(sf::Color::White);
+    m_textscore.setOutlineThickness(0.8f);
+    m_textscore.setPosition(
       m_currentShiftLeft + SCORE_SHIFT_LEFT_RELATIVE_TO_GRID - scoreWidth,
       m_currentShiftHeight + SCORE_SHIFT_HEIGHT_RELATIVE_TO_GRID);
-    m_prenderWindow->draw(scoreText);
+    m_prenderWindow->draw(m_textscore);
 
-    sf::Text lineText(m_strcountLines, m_gameFont, LINE_FONT_SIZE);
-    float lineWidth = lineText.getLocalBounds().width;
-    lineText.setFillColor(sf::Color::Black);
-    lineText.setOutlineColor(sf::Color::White);
-    lineText.setOutlineThickness(0.8f);
-    lineText.setPosition(
+    // sf::Text m_textline(m_strcountLines, m_gameFont, LINE_FONT_SIZE);
+    m_textline.setString(m_strcountLines);
+    float lineWidth = m_textline.getLocalBounds().width;
+    m_textline.setFillColor(sf::Color::Black);
+    m_textline.setOutlineColor(sf::Color::White);
+    m_textline.setOutlineThickness(0.8f);
+    m_textline.setPosition(
       m_currentShiftLeft + LINE_SHIFT_LEFT_RELATIVE_TO_GRID - lineWidth,
       m_currentShiftHeight + LINE_SHIFT_HEIGHT_RELATIVE_TO_GRID);
-    m_prenderWindow->draw(lineText);
+    m_prenderWindow->draw(m_textline);
 
-    sf::Text levelText(m_strlevel, m_gameFont, LEVELF_FONT_SIZE);
-    float levelWidth = levelText.getLocalBounds().width;
-    levelText.setFillColor(sf::Color::Black);
-    levelText.setOutlineColor(sf::Color::White);
-    levelText.setOutlineThickness(0.8f);
-    levelText.setPosition(
+    // sf::Text m_textlevel(m_strlevel, m_gameFont, LEVELF_FONT_SIZE);
+    m_textlevel.setString(m_strlevel);
+    float levelWidth = m_textlevel.getLocalBounds().width;
+    m_textlevel.setFillColor(sf::Color::Black);
+    m_textlevel.setOutlineColor(sf::Color::White);
+    m_textlevel.setOutlineThickness(0.8f);
+    m_textlevel.setPosition(
       m_currentShiftLeft + LEVELF_SHIFT_LEFT_RELATIVE_TO_GRID - levelWidth,
       m_currentShiftHeight + LEVELF_SHIFT_HEIGHT_RELATIVE_TO_GRID);
-    m_prenderWindow->draw(levelText);
+    m_prenderWindow->draw(m_textlevel);
 }
 
 void
@@ -1012,7 +1068,7 @@ Board::looser(bool isHumanLoose)
         youLoose.setString("You loose !");
     else
         youLoose.setString("Computer loose !");
-    
+
     youLoose.setCharacterSize(30);
     youLoose.setFont(m_gameFont);
     sf::FloatRect fr = youLoose.getGlobalBounds();
@@ -1049,7 +1105,7 @@ Board::downSpecifics()
             m_strscore = std::to_string(m_iscore);
 
             freezeCurrentShape();
-            removesFullLines();
+            removeFullLines();
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();

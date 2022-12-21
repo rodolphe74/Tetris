@@ -18,6 +18,8 @@ enum GameState
     scrollRight,
     scrollLeft,
     scrollLine,
+    collapse,
+    scrollUp,
     gameOver,
     undefined
 };

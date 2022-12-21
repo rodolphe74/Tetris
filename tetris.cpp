@@ -262,11 +262,17 @@ main()
 
                 // gameover ?
                 if (humanBoard->m_ecurrentGameState == gameOver) {
+                    // Keeping only gameOver gameState in the queue
+                    humanBoard->m_equeueGameStates.clear();
+                    humanBoard->m_equeueGameStates.pushFront(gameOver);
                     humanBoard->looser(true);
                 }
+
+                // queued thread to dealloc ?
+                humanBoard->m_equeueGameStates.sweepFinishedThreads();
             } else {
                 // GAME_HUMAN_VS_COMPUTER
-                humanBoard->m_boolAutoplay = false;
+                humanBoard->m_boolAutoplay = false/*true*/;
                 humanBoard->checkKeyboard();
                 humanBoard->render(
                   3 * (WINDOW_W / 4) - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
@@ -290,30 +296,40 @@ main()
 
                 // send lines to the opponent in 2 players mode ?
                 if (humanBoard->m_icountScrolledDown > 1) {
+                    int upCount = humanBoard->m_icountScrolledDown - 1;
+                    humanBoard->m_icountScrolledDown = 0;
                     printf("##################### send lines to computer :%d "
                            "#####################\n",
                            humanBoard->m_icountScrolledDown - 1);
-                    computerBoard->receiveLinesFromOpponent(
-                      humanBoard->m_icountScrolledDown - 1);
-                    humanBoard->m_icountScrolledDown = 0;
+                    computerBoard->receiveLinesFromOpponent(upCount);
                 }
                 if (computerBoard->m_icountScrolledDown > 1) {
+                    int upCount = computerBoard->m_icountScrolledDown - 1;
+                    computerBoard->m_icountScrolledDown = 0;
                     printf("##################### send lines to human :%d "
                            "#####################\n",
                            computerBoard->m_icountScrolledDown - 1);
-                    humanBoard->receiveLinesFromOpponent(
-                      computerBoard->m_icountScrolledDown - 1);
-                    computerBoard->m_icountScrolledDown = 0;
+                    humanBoard->receiveLinesFromOpponent(upCount);
                 }
 
                 // Check if one player is gameOver
                 if (humanBoard->m_ecurrentGameState == gameOver) {
-                    computerBoard->m_equeueGameStates.pushBack(none);
+                    humanBoard->m_equeueGameStates.clear();
+                    humanBoard->m_equeueGameStates.pushFront(gameOver);
+                    computerBoard->m_equeueGameStates.clear();
+                    computerBoard->m_equeueGameStates.pushFront(none);
                     humanBoard->looser(true);
                 } else if (computerBoard->m_ecurrentGameState == gameOver) {
-                    humanBoard->m_equeueGameStates.pushBack(none);
+                    computerBoard->m_equeueGameStates.clear();
+                    computerBoard->m_equeueGameStates.pushFront(gameOver);
+                    humanBoard->m_equeueGameStates.clear();
+                    humanBoard->m_equeueGameStates.pushFront(none);
                     computerBoard->looser(false);
                 }
+
+                // queued thread to dealloc ?
+                humanBoard->m_equeueGameStates.sweepFinishedThreads();
+                computerBoard->m_equeueGameStates.sweepFinishedThreads();
             }
         }
 

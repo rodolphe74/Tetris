@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #define SHAPE_SIZE 4
 #define GRID_W 10
 #define GRID_H 20
@@ -53,5 +55,7 @@ constexpr int LEVELF_FONT_SIZE = 24;
 constexpr float QUICK_TIME_MULTIPLIER = 0.08f;
 constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;
 
-constexpr int SLEEP_TIME_BETWEEN_EVERY_MOVE_MS = 250;
+constexpr int SLEEP_TIME_BETWEEN_EVERY_MOVE_MS = 200;
 constexpr int AUTOPLAY_DEPTH = 3;
+
+constexpr int64_t SAFETY_ALLOWANCE_DEALLOCATION_TIME_MS = 1000;

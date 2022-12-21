@@ -71,13 +71,15 @@ class Board
     int m_currentFrameRate = 30;
     int m_currentFrameCount = 0;
     int m_arlinesToRemove[GRID_H] = { 0 };
+    int m_arlinesToCollapse[GRID_H] = { 0 };
     float m_currentLineExtension = 0.0f;
     float m_currentLineExtensionStep = 1.0f;
     int m_ishapesQueue[SHAPES_QUEUE_SIZE];
     bool m_boolonceLineSound = false;
     bool m_boolshouldRotate = 0;
     bool m_boolshouldWarp = 0;
-    bool m_boolshouldIa = 0;
+    int m_ishouldCollapse = 0;
+    bool m_boolshouldAddLinesToOpponent = 0;
     bool m_boolparticlesLevel = false;
     int m_icountLines = 0;
     int m_icountLinesPerLevel = 0;
@@ -86,6 +88,10 @@ class Board
     std::string m_strscore = "0";
     std::string m_strcountLines = "0";
     std::string m_strlevel = "1";
+    sf::Text m_textscore;
+    sf::Text m_textline;
+    sf::Text m_textlevel;
+
 
   public:
     GameStatesQueue m_equeueGameStates;
@@ -209,6 +215,14 @@ class Board
         }
         m_soundGameOver.setBuffer(m_soundBufferGameOver);
 
+        // init strings and text
+        m_textscore.setFont(m_gameFont);
+        m_textscore.setCharacterSize(SCORE_FONT_SIZE);
+        m_textline.setFont(m_gameFont);
+        m_textline.setCharacterSize(LINE_FONT_SIZE);
+        m_textlevel.setFont(m_gameFont);
+        m_textlevel.setCharacterSize(LEVELF_FONT_SIZE);
+
         srand((unsigned int)time(NULL));
         for (int i = 0; i < sizeof(m_ishapesQueue) / sizeof(int); i++) {
             float s = static_cast<float>(rand()) /
@@ -241,8 +255,10 @@ class Board
     bool checkIfCurrentLeftShiftShapeCollide();
     bool checkIfCurrentRightShiftShapeCollide();
     void freezeCurrentShape();
-    bool removesFullLines();
+    bool removeFullLines();
+    bool removeEmptyLines();
     void receiveLinesFromOpponent(int count);
+    void receiveLineFromeOpponent();
     void scrollEverythingDown(int fromLine);
     void scrollEverythingUp(int fromLine);
     void right();
