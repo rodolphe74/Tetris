@@ -59,24 +59,18 @@ GameStatesQueue::pushBackAfterAWhileInMs(GameState gs, int timeInMs)
         sf::Clock c;
         c.restart();
 
-        // while (c.getElapsedTime().asMilliseconds() < timeInMs) {
-        //     sf::sleep(sf::Time(sf::milliseconds(timeInMs / 10)));
-        //     printf("  wait : %d\n", c.getElapsedTime().asMilliseconds());
-        // }
-
         printf("  wait : %d\n", timeInMs);
         sf::sleep(sf::Time(sf::milliseconds(timeInMs)));
 
         printf("post in queue\n");
         m_queueStates.push_front(gs);
+        countEnqueue++;
     });
     printf("save thread %p\n", t);
     ThreadDuration* ptd = new ThreadDuration;
-    // { t, timeSinceEpochMillisec() + timeInMs };
     ptd->deallocTime = timeSinceEpochMillisec() + timeInMs;
     ptd->pthread = t;
     m_threadsToFree.push_back(ptd);
-    // m_threadsToFree.push_back(ptd);
     printf("launch thread %p\n", t);
     t->launch();
 }
@@ -90,15 +84,6 @@ GameStatesQueue::clear()
 void
 GameStatesQueue::sweepFinishedThreads()
 {
-    // for (std::vector<sf::Thread*>::iterator t = m_threadsToFree.begin();
-    //      t != m_threadsToFree.end();
-    //      t++) {
-
-    //    (*t)->wait();
-    //    printf("deleting thread %p\n", *t);
-    //    delete *t;
-    //}
-
     std::vector<ThreadDuration*> newAllocatedThreads;
     uint64_t currentEpoch = timeSinceEpochMillisec();
     for (std::vector<ThreadDuration*>::iterator ptd = m_threadsToFree.begin();
