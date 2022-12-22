@@ -344,7 +344,7 @@ Board::render(float shiftLeft,
     }
 
     if (m_ecurrentGameState == scrollUp) {
-        receiveLineFromeOpponent();
+        receiveLineFromOpponent();
     }
 
     // shall we free some allocated resources
@@ -718,7 +718,7 @@ Board::receiveLinesFromOpponent(int count)
 }
 
 void
-Board::receiveLineFromeOpponent()
+Board::receiveLineFromOpponent()
 {
     scrollEverythingUp(GRID_H);
     int r = std::rand() % (GRID_W - 1);

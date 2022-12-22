@@ -258,7 +258,7 @@ class Board
     bool removeFullLines();
     bool removeEmptyLines();
     void receiveLinesFromOpponent(int count);
-    void receiveLineFromeOpponent();
+    void receiveLineFromOpponent();
     void scrollEverythingDown(int fromLine);
     void scrollEverythingUp(int fromLine);
     void right();
