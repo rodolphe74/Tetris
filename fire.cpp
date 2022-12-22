@@ -238,7 +238,7 @@ Fire::nextFrame(int& frameCount)
                         ->m_arcolorPalette[(*f)
                                              ->m_iarfire[(*f)->getOffset(y, x)]]
                         .b,
-                      (*f)->m_ialpha / 1.5f);
+                      (uint8_t) ((*f)->m_ialpha / 1.5f));
 
                     if ((*f)->getL(c) < 32) {
                         // nothing when lum < 32

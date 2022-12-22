@@ -88,7 +88,7 @@ Board::render(float shiftLeft,
     m_prenderWindow->draw(r);
 
     // Get game state
-    m_equeueGameStates.debugQueueSize();
+    // m_equeueGameStates.debugQueueSize();
 
     m_ecurrentGameState = m_equeueGameStates.popFront(m_ecurrentGameState);
     // printf("GameState:%d\n", m_ecurrentGameState);
@@ -1209,7 +1209,9 @@ Board::iaMoveThread()
                                              m_currentShapeCol,
                                              AUTOPLAY_DEPTH,
                                              AUTOPLAY_DEPTH);
-            printf("Evaluated positions:%d\n", Ia::searchCount);
+            printf("Evaluated positions:%d - Score:%d\n",
+                   Ia::searchCount,
+                   posIa.score);
 
             int leftCount = m_currentShapeCol - posIa.col;
             int rightCount = posIa.col - m_currentShapeCol;

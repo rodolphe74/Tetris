@@ -1,4 +1,5 @@
 #include "ia.h"
+#include "shapes.h"
 
 int Ia::searchCount = 0;
 
@@ -79,7 +80,8 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
     int bestRow = 0;
     int bestRot = 0;
 
-    for (int rot = 0; rot < 4; rot++) {
+    // for (int rot = 0; rot < 4; rot++) {
+    for (int rot = 0; rot < tt::gDepthRotationSearch[currentShape]; rot++) {
 
         currentBottomShiftShape = findBottomShiftShape(currentShape, rot);
         currentLeftShiftShape = findLeftShiftShape(currentShape, rot);
@@ -106,12 +108,12 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                 break;
         }
 
-        //printf("minLeft:%d   maxRight:%d   currentLeftShiftShape:%d   "
-        //       "currentRightShiftShape:%d\n",
-        //       minLeft,
-        //       maxRight,
-        //       currentLeftShiftShape,
-        //       currentRightShiftShape);
+        // printf("minLeft:%d   maxRight:%d   currentLeftShiftShape:%d   "
+        //        "currentRightShiftShape:%d\n",
+        //        minLeft,
+        //        maxRight,
+        //        currentLeftShiftShape,
+        //        currentRightShiftShape);
 
         for (int x = minLeft; x <= maxRight; x++) {
             int updatedGrid[GRID_H][GRID_W] = { 0 };
@@ -125,11 +127,11 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                                     updatedGrid);
 
             if (fullDepth - currentDepth != 0) {
-                //printf("Shape Queue:%d\n", fullDepth - currentDepth - 1);
+                // printf("Shape Queue:%d\n", fullDepth - currentDepth - 1);
                 currentShape = shapesQueue[fullDepth - currentDepth - 1];
             }
 
-            //printf("CurrentShape:%d\n", currentShape);
+            // printf("CurrentShape:%d\n", currentShape);
 
             Pos currentPos = findBestPosition(updatedGrid,
                                               shapesQueue,
@@ -150,8 +152,8 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                 bestRow = r;
                 bestRot = rot;
             }
-            //Ia::debugGrid(updatedGrid);
-            //printf("Score:%d\n\n", currentScore);
+            // Ia::debugGrid(updatedGrid);
+            // printf("Score:%d\n\n", currentScore);
         }
     }
 
@@ -170,6 +172,7 @@ Ia::getScore(int argrid[GRID_H][GRID_W])
     int score = 0;
     int lineScore = 0;
     int lineSquare = 0;
+    int lineCount = 0;
     for (int y = 0; y < GRID_H; y++) {
         lineScore = 0;
         lineSquare = 0;
@@ -184,7 +187,11 @@ Ia::getScore(int argrid[GRID_H][GRID_W])
         }
         score += lineScore;
         if (lineSquare == GRID_W) {
-            score += 1000;
+            // score += 1000;
+            if (lineCount > 2)
+                printf("   lineCount:%d\n", lineCount);
+            score += 1000 * (int)powf(10, (float)lineCount);
+            lineCount++;
         }
     }
 
