@@ -31,6 +31,7 @@ class Ia
     static int findRightShiftShape(int shape, int rotation);
 
   public:
+    static Pos m_arrpositions[16];
     static int searchCount;
     static Pos findBestPosition(int argrid[GRID_H][GRID_W],
                                 int shapesQueue[SHAPES_QUEUE_SIZE],

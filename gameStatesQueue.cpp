@@ -44,7 +44,6 @@ GameStatesQueue::pushBack(GameState gs)
 void
 GameStatesQueue::pushFront(GameState gs)
 {
-    printf("pushFront\n");
     countEnqueue++;
     m_queueStates.push_front(gs);
 }
@@ -73,6 +72,20 @@ GameStatesQueue::pushBackAfterAWhileInMs(GameState gs, int timeInMs)
     m_threadsToFree.push_back(ptd);
     printf("launch thread %p\n", t);
     t->launch();
+}
+
+void
+GameStatesQueue::purgeQueueFromState(GameState gs)
+{
+    std::deque<GameState> newQueueStates;
+
+    for (auto i : m_queueStates) {
+        if (i != gs) {
+            newQueueStates.push_back(i);
+        }
+    }
+    m_queueStates.clear();
+    m_queueStates = newQueueStates;
 }
 
 void

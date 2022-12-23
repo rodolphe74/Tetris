@@ -2,6 +2,7 @@
 #include "shapes.h"
 
 int Ia::searchCount = 0;
+Pos Ia::m_arrpositions[16] = {};
 
 int
 Ia::freezeShape(int argrid[GRID_H][GRID_W],
@@ -80,7 +81,6 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
     int bestRow = 0;
     int bestRot = 0;
 
-    // for (int rot = 0; rot < 4; rot++) {
     for (int rot = 0; rot < tt::gDepthRotationSearch[currentShape]; rot++) {
 
         currentBottomShiftShape = findBottomShiftShape(currentShape, rot);
@@ -152,6 +152,7 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                 bestRow = r;
                 bestRot = rot;
             }
+
             // Ia::debugGrid(updatedGrid);
             // printf("Score:%d\n\n", currentScore);
         }
@@ -161,7 +162,12 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
     //   "bestScore:%d / bestCol:%d / bestRow:%d\n", bestScore, bestCol,
     //   bestRow);
 
+    
     Pos pos = { bestRow, bestCol, bestRot, currentShape, bestScore };
+    
+    // TODO : for every depth, compare with existing and replace in vec if
+    // necessary
+    //m_arrpositions[currentDepth - 1] = pos;
 
     return pos;
 }
@@ -187,9 +193,9 @@ Ia::getScore(int argrid[GRID_H][GRID_W])
         }
         score += lineScore;
         if (lineSquare == GRID_W) {
-            // score += 1000;
-            if (lineCount > 2)
-                printf("   lineCount:%d\n", lineCount);
+             //score += 1000;
+            //if (lineCount > 2)
+            //    printf("   lineCount:%d\n", lineCount);
             score += 1000 * (int)powf(10, (float)lineCount);
             lineCount++;
         }

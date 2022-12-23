@@ -3,10 +3,10 @@
 #include "audioStream.h"
 #include "constants.h"
 #include "fog.h"
+#include "gameStatesQueue.h"
 #include "globals.h"
 #include "math.h"
 #include "particles.h"
-#include "gameStatesQueue.h"
 #include "shapes.h"
 #include "string.h"
 #include <SFML/Audio.hpp>
@@ -92,7 +92,6 @@ class Board
     sf::Text m_textline;
     sf::Text m_textlevel;
 
-
   public:
     GameStatesQueue m_equeueGameStates;
     GameState m_ecurrentGameState;
@@ -104,6 +103,7 @@ class Board
     float m_ftimeMultiplier = 1.0f;
     bool m_boolAutoplay = false;
     int m_icountScrolledDown = 0;
+    int m_icurrentDepth = AUTOPLAY_DEPTH;
 
     // Music
     static sf::SoundBuffer m_soundBufferMainOne;
@@ -228,6 +228,8 @@ class Board
             float s = static_cast<float>(rand()) /
                       (static_cast<float>(RAND_MAX / 6.0f));
             m_ishapesQueue[i] = (int)round(s);
+            // DEBUG
+            // m_ishapesQueue[i] = 0;
         }
 
         bool m_shouldRotate = 0;

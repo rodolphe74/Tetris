@@ -30,6 +30,7 @@ class GameStatesQueue
     void pushBack(GameState gs);
     void pushFront(GameState gs);
     void pushBackAfterAWhileInMs(GameState gs, int timeInMs);
+    void purgeQueueFromState(GameState gs);
     void clear();
     void sweepFinishedThreads();
     void debugQueueSize();

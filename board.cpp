@@ -298,6 +298,9 @@ Board::render(float shiftLeft,
 
     if (m_ecurrentGameState == collapse) {
 
+        // patch : prevent scrollLine bothering
+        m_equeueGameStates.purgeQueueFromState(scrollLine);
+
         removeEmptyLines();
 
         m_icountScrolledDown = 0;
@@ -473,6 +476,18 @@ Board::clear()
             m_argrid[y][x] = NOTHING_IN_SQUARE;
         }
     }
+
+    // DEBUG
+    // for (int y = 0; y < GRID_H; y++) {
+    //    for (int x = 0; x < GRID_W; x++) {
+
+    //        if (y > 15 && x > 0) {
+    //            m_argrid[y][x] = SOMETHING_IN_SQUARE;
+    //        } else {
+    //            m_argrid[y][x] = NOTHING_IN_SQUARE;
+    //        }
+    //    }
+    //}
 }
 
 void
@@ -672,6 +687,11 @@ Board::removeEmptyLines()
             checkFromLine = y;
             break;
         }
+    }
+
+    if (checkFromLine == 0) {
+        // special case : empty grid
+        return false;
     }
 
     printf("Check from line %d\n", checkFromLine);
@@ -926,6 +946,10 @@ Board::getNextShape()
     }
     float s =
       static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 6.0f));
+
+    // DEBUG
+    // float s = 0;
+
     int lastIndex = sizeof(m_ishapesQueue) / sizeof(int) - 1;
     m_ishapesQueue[lastIndex] = (int)round(s);
 
@@ -1193,25 +1217,32 @@ Board::getCurrentLevelMultiplier()
 void
 Board::iaMoveThread()
 {
+    printf("Searching at depth:%d\n", m_icurrentDepth);
     if (!m_bisComputerMoving && !m_moveComputerThreadAllocated) {
         m_moveComputerThreadAllocated = true;
         m_moveComputerThread = new sf::Thread([this]() {
             m_bisComputerMoving = true;
             Ia::searchCount = 0;
-            Pos posIa = Ia::findBestPosition(m_argrid,
-                                             m_ishapesQueue,
-                                             m_currentShape,
-                                             m_currentShapeRotation,
-                                             m_currentBottomShiftShape,
-                                             m_currentLeftShiftShape,
-                                             m_currentRightShiftShape,
-                                             m_currentShapeRow,
-                                             m_currentShapeCol,
-                                             AUTOPLAY_DEPTH,
-                                             AUTOPLAY_DEPTH);
+            Pos posIa =
+              Ia::findBestPosition(m_argrid,
+                                   m_ishapesQueue,
+                                   m_currentShape,
+                                   m_currentShapeRotation,
+                                   m_currentBottomShiftShape,
+                                   m_currentLeftShiftShape,
+                                   m_currentRightShiftShape,
+                                   m_currentShapeRow,
+                                   m_currentShapeCol,
+                                   /*AUTOPLAY_DEPTH*/ m_icurrentDepth,
+                                   /*AUTOPLAY_DEPTH*/ m_icurrentDepth);
             printf("Evaluated positions:%d - Score:%d\n",
                    Ia::searchCount,
                    posIa.score);
+
+            // AUTOPLAY_DEPTH--
+            m_icurrentDepth--;
+            if (m_icurrentDepth == 0)
+                m_icurrentDepth = AUTOPLAY_DEPTH;
 
             int leftCount = m_currentShapeCol - posIa.col;
             int rightCount = posIa.col - m_currentShapeCol;
