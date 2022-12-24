@@ -3,6 +3,8 @@
 
 int Ia::searchCount = 0;
 Pos Ia::m_arrpositions[16] = {};
+std::stack<Pos> Ia::m_stackcurrent;
+std::stack<Pos> Ia::m_stacksaved;
 
 int
 Ia::freezeShape(int argrid[GRID_H][GRID_W],
@@ -54,6 +56,15 @@ Ia::freezeShape(int argrid[GRID_H][GRID_W],
     return maxRow;
 }
 
+inline int
+Ia::checkSomethingInVerticalLine(int argrid[GRID_H][GRID_W],
+                                 int x,
+                                 int y,
+                                 int direction)
+{
+    return false;
+}
+
 Pos
 Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                      int shapesQueue[SHAPES_QUEUE_SIZE],
@@ -71,8 +82,21 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
     if (currentDepth == 0) {
         searchCount++;
         int score = getScore(argrid);
-        Pos pos = { row, col, currentRotation, currentShape, score };
-        return pos;
+        Pos evaluatedPos = { row, col, currentRotation, currentShape, score };
+
+        // on leaf, compare stack with saved stack - if score is better, replace
+        // top stack with the same move adding the evaluated score
+        // at the end of the recursive function, m_stacksaved contains the path
+        // to the best scored leaf
+        if (score > m_stacksaved.top().score) {
+            Pos topPos = m_stackcurrent.top();
+            topPos.score = score;
+            m_stackcurrent.pop();
+            m_stackcurrent.push(topPos);
+            m_stacksaved = m_stackcurrent;
+        }
+
+        return evaluatedPos;
     }
 
     // find best score at row
@@ -126,16 +150,13 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                                     rot,
                                     updatedGrid);
 
-            if (fullDepth - currentDepth != 0) {
-                // printf("Shape Queue:%d\n", fullDepth - currentDepth - 1);
-                currentShape = shapesQueue[fullDepth - currentDepth - 1];
-            }
+            int nextShape = shapesQueue[fullDepth - currentDepth];
 
-            // printf("CurrentShape:%d\n", currentShape);
-
+            Pos searchPos = { r, x, rot, currentShape, 0 };
+            m_stackcurrent.push(searchPos);
             Pos currentPos = findBestPosition(updatedGrid,
                                               shapesQueue,
-                                              currentShape,
+                                              nextShape,
                                               currentRotation,
                                               currentBottomShiftShape,
                                               currentLeftShiftShape,
@@ -144,6 +165,8 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                                               col,
                                               currentDepth - 1,
                                               fullDepth);
+            m_stackcurrent.pop();
+
             int currentScore = currentPos.score;
 
             if (currentScore > bestScore) {
@@ -152,23 +175,12 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                 bestRow = r;
                 bestRot = rot;
             }
-
             // Ia::debugGrid(updatedGrid);
-            // printf("Score:%d\n\n", currentScore);
         }
     }
 
-    // printf(
-    //   "bestScore:%d / bestCol:%d / bestRow:%d\n", bestScore, bestCol,
-    //   bestRow);
-
-    
+    // not necessary but returns the best pos (same as m_stacksaved top)
     Pos pos = { bestRow, bestCol, bestRot, currentShape, bestScore };
-    
-    // TODO : for every depth, compare with existing and replace in vec if
-    // necessary
-    //m_arrpositions[currentDepth - 1] = pos;
-
     return pos;
 }
 
@@ -178,7 +190,7 @@ Ia::getScore(int argrid[GRID_H][GRID_W])
     int score = 0;
     int lineScore = 0;
     int lineSquare = 0;
-    int lineCount = 0;
+    // int lineCount = 0;
     for (int y = 0; y < GRID_H; y++) {
         lineScore = 0;
         lineSquare = 0;
@@ -193,13 +205,40 @@ Ia::getScore(int argrid[GRID_H][GRID_W])
         }
         score += lineScore;
         if (lineSquare == GRID_W) {
-             //score += 1000;
-            //if (lineCount > 2)
-            //    printf("   lineCount:%d\n", lineCount);
-            score += 1000 * (int)powf(10, (float)lineCount);
-            lineCount++;
+            score += 1000 * y; // bonus on bottom lines
+            // if (lineCount > 2)
+            //     printf("   lineCount:%d\n", lineCount);
+            // score += 1000 * (int)powf(10, (float)lineCount);
+            // lineCount++;
         }
     }
+
+
+    // TODO : malus when holes
+    //int emmenthal = 0;
+    //for (int y = 0; y < GRID_H; y++) {
+    //    for (int x = 0; x < GRID_W; x++) {
+
+    //        if (argrid[y][x] == NOTHING_IN_SQUARE &&
+    //            (x > 0 ? argrid[y][x - 1] == SOMETHING_IN_SQUARE
+    //                   : argrid[y][x] == NOTHING_IN_SQUARE) &&
+    //            (x < GRID_W - 1 ? argrid[y][x + 1] == SOMETHING_IN_SQUARE
+    //                            : argrid[y][x] == NOTHING_IN_SQUARE) &&
+    //            (y > 0 ? argrid[y - 1][x] == SOMETHING_IN_SQUARE
+    //                   : argrid[y][x] == NOTHING_IN_SQUARE) &&
+    //            (y < GRID_H - 1 ? argrid[y + 1][x] == SOMETHING_IN_SQUARE
+    //                            : argrid[y][x] == NOTHING_IN_SQUARE)) {
+
+    //            //printf("Penalité emmenthal %d,%d\n", x, y);
+    //            emmenthal++;
+    //        }
+    //    }
+    //}
+
+    //score -= (emmenthal * 100);
+
+    //if (emmenthal > 0)
+    //    debugGrid(argrid);
 
     return score;
 }
@@ -302,6 +341,21 @@ Ia::findRightShiftShape(int shape, int rotation)
     return 0;
 }
 
+inline int
+Ia::checkSomethingInHorizontalLine(int argrid[GRID_H][GRID_W],
+                                   int x,
+                                   int y,
+                                   int direction)
+{
+    int i = x;
+    for (i = x; i < GRID_W && i >= 0; i += direction) {
+        if (argrid[y][i] == SOMETHING_IN_SQUARE) {
+            return i;
+        }
+    }
+    return i;
+}
+
 void
 Ia::debugGrid(int argrid[GRID_H][GRID_W])
 {
@@ -315,4 +369,54 @@ Ia::debugGrid(int argrid[GRID_H][GRID_W])
         }
         printf("\n");
     }
+}
+
+std::stack<Pos>
+Ia::reverseStack()
+{
+    std::stack<Pos> s;
+    while (!m_stacksaved.empty()) {
+        s.push(m_stacksaved.top());
+        m_stacksaved.pop();
+    }
+    return s;
+}
+
+void
+Ia::debugStack()
+{
+    std::stack<Pos> s = m_stacksaved;
+    while (!s.empty()) {
+        printf("%d-%d(%d,%d=%d) | ",
+               s.top().shape,
+               s.top().score,
+               s.top().col,
+               s.top().row,
+               s.top().rotation);
+        s.pop();
+    }
+    printf("\n");
+}
+
+void
+Ia::clearStack()
+{
+    m_stacksaved = std::stack<Pos>();
+    for (int i = 0; i < AUTOPLAY_DEPTH + 1; i++)
+        m_stacksaved.push({});
+}
+
+void
+Ia::debugStack(std::stack<Pos>& s)
+{
+    while (!s.empty()) {
+        printf("%d-%d(%d,%d=%d) | ",
+               s.top().shape,
+               s.top().score,
+               s.top().col,
+               s.top().row,
+               s.top().rotation);
+        s.pop();
+    }
+    printf("\n");
 }

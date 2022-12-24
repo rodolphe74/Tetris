@@ -127,7 +127,6 @@ init()
     humanBoard->findCurrentRightShiftShape();
     humanBoard->m_equeueGameStates.pushBack(none);
     humanBoard->normalSpeed();
-    humanBoard->m_icurrentDepth = AUTOPLAY_DEPTH;
 
     // not always used
     computerBoard = new Board(*window);
@@ -139,7 +138,6 @@ init()
     computerBoard->findCurrentRightShiftShape();
     humanBoard->m_equeueGameStates.pushBack(none);
     computerBoard->normalSpeed();
-    computerBoard->m_icurrentDepth = AUTOPLAY_DEPTH;
 
     background = new AnimatedBackground(*window);
 

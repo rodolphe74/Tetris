@@ -1217,32 +1217,41 @@ Board::getCurrentLevelMultiplier()
 void
 Board::iaMoveThread()
 {
-    printf("Searching at depth:%d\n", m_icurrentDepth);
     if (!m_bisComputerMoving && !m_moveComputerThreadAllocated) {
         m_moveComputerThreadAllocated = true;
         m_moveComputerThread = new sf::Thread([this]() {
             m_bisComputerMoving = true;
-            Ia::searchCount = 0;
-            Pos posIa =
-              Ia::findBestPosition(m_argrid,
-                                   m_ishapesQueue,
-                                   m_currentShape,
-                                   m_currentShapeRotation,
-                                   m_currentBottomShiftShape,
-                                   m_currentLeftShiftShape,
-                                   m_currentRightShiftShape,
-                                   m_currentShapeRow,
-                                   m_currentShapeCol,
-                                   /*AUTOPLAY_DEPTH*/ m_icurrentDepth,
-                                   /*AUTOPLAY_DEPTH*/ m_icurrentDepth);
-            printf("Evaluated positions:%d - Score:%d\n",
-                   Ia::searchCount,
-                   posIa.score);
 
-            // AUTOPLAY_DEPTH--
-            m_icurrentDepth--;
-            if (m_icurrentDepth == 0)
-                m_icurrentDepth = AUTOPLAY_DEPTH;
+            if (Ia::m_stacksaved.size() == 0) {
+
+                Ia::searchCount = 0;
+                Ia::clearStack();
+                Pos posIa =
+                  Ia::findBestPosition(m_argrid,
+                                       m_ishapesQueue,
+                                       m_currentShape,
+                                       m_currentShapeRotation,
+                                       m_currentBottomShiftShape,
+                                       m_currentLeftShiftShape,
+                                       m_currentRightShiftShape,
+                                       m_currentShapeRow,
+                                       m_currentShapeCol,
+                                       AUTOPLAY_DEPTH,
+                                       AUTOPLAY_DEPTH);
+                printf("Evaluated positions:%d - Score:%d\n",
+                       Ia::searchCount,
+                       posIa.score);
+                printf("Stack size %d\n", (int)Ia::m_stackcurrent.size());
+
+                Ia::debugStack();
+                Ia::m_stacksaved = Ia::reverseStack();
+                Ia::debugStack();
+            }
+
+            Pos posIa = Ia::m_stacksaved.top();
+            Ia::m_stacksaved.pop();
+
+            printf("playing shape %d\n", posIa.shape);
 
             int leftCount = m_currentShapeCol - posIa.col;
             int rightCount = posIa.col - m_currentShapeCol;
@@ -1282,6 +1291,7 @@ Board::iaMoveThread()
 
             m_bisComputerMoving = false;
         });
+
         m_moveComputerThread->launch();
     }
 }

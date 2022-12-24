@@ -103,7 +103,6 @@ class Board
     float m_ftimeMultiplier = 1.0f;
     bool m_boolAutoplay = false;
     int m_icountScrolledDown = 0;
-    int m_icurrentDepth = AUTOPLAY_DEPTH;
 
     // Music
     static sf::SoundBuffer m_soundBufferMainOne;
