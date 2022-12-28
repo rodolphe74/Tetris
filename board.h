@@ -224,11 +224,8 @@ class Board
 
         srand((unsigned int)time(NULL));
         for (int i = 0; i < sizeof(m_ishapesQueue) / sizeof(int); i++) {
-            float s = static_cast<float>(rand()) /
-                      (static_cast<float>(RAND_MAX / 6.0f));
-            m_ishapesQueue[i] = (int)round(s);
-            // DEBUG
-            // m_ishapesQueue[i] = 0;
+            int s = rand() % 7;
+            m_ishapesQueue[i] = s;
         }
 
         bool m_shouldRotate = 0;

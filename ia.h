@@ -38,6 +38,19 @@ class Ia
                                                    int x,
                                                    int y,
                                                    int direction);
+    static inline bool isValid(int argrid[GRID_H][GRID_W],
+                               int x,
+                               int y,
+                               int prevC,
+                               int newC);
+    static inline int floodFill(int argrid[GRID_H][GRID_W],
+                                int x,
+                                int y,
+                                int prevC,
+                                int newC);
+
+    static std::vector<std::pair<int, int>> queue;
+    static std::pair<int, int> p;
 
   public:
     static Pos m_arrpositions[16];
@@ -55,6 +68,9 @@ class Ia
                                 int col,
                                 int currentDepth,
                                 int fullDepth);
+
+    static int countHoles(int argrid[GRID_H][GRID_W]);
+    static int countHolesUnderTheRoof(int argrid[GRID_H][GRID_W]);
 
     static std::stack<Pos> reverseStack();
     static void debugGrid(int argrid[GRID_H][GRID_W]);

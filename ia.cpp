@@ -1,10 +1,14 @@
 #include "ia.h"
 #include "shapes.h"
+#include <vector>
 
 int Ia::searchCount = 0;
 Pos Ia::m_arrpositions[16] = {};
 std::stack<Pos> Ia::m_stackcurrent;
 std::stack<Pos> Ia::m_stacksaved;
+
+std::vector<std::pair<int, int>> Ia::queue;
+std::pair<int, int> Ia::p;
 
 int
 Ia::freezeShape(int argrid[GRID_H][GRID_W],
@@ -184,6 +188,15 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
     return pos;
 }
 
+inline bool
+Ia::isValid(int argrid[GRID_H][GRID_W], int x, int y, int prevC, int newC)
+{
+    if (x < 0 || x >= GRID_W || y < 0 || y >= GRID_H ||
+        argrid[y][x] == SOMETHING_IN_SQUARE || argrid[y][x] == FLOODED_IN_SQUARE)
+        return false;
+    return true;
+}
+
 int
 Ia::getScore(int argrid[GRID_H][GRID_W])
 {
@@ -206,39 +219,23 @@ Ia::getScore(int argrid[GRID_H][GRID_W])
         score += lineScore;
         if (lineSquare == GRID_W) {
             score += 1000 * y; // bonus on bottom lines
-            // if (lineCount > 2)
-            //     printf("   lineCount:%d\n", lineCount);
-            // score += 1000 * (int)powf(10, (float)lineCount);
             // lineCount++;
         }
     }
 
 
-    // TODO : malus when holes
-    //int emmenthal = 0;
-    //for (int y = 0; y < GRID_H; y++) {
-    //    for (int x = 0; x < GRID_W; x++) {
+    // Too slow and does not play well 
+    // int emmental = countHoles(argrid);
 
-    //        if (argrid[y][x] == NOTHING_IN_SQUARE &&
-    //            (x > 0 ? argrid[y][x - 1] == SOMETHING_IN_SQUARE
-    //                   : argrid[y][x] == NOTHING_IN_SQUARE) &&
-    //            (x < GRID_W - 1 ? argrid[y][x + 1] == SOMETHING_IN_SQUARE
-    //                            : argrid[y][x] == NOTHING_IN_SQUARE) &&
-    //            (y > 0 ? argrid[y - 1][x] == SOMETHING_IN_SQUARE
-    //                   : argrid[y][x] == NOTHING_IN_SQUARE) &&
-    //            (y < GRID_H - 1 ? argrid[y + 1][x] == SOMETHING_IN_SQUARE
-    //                            : argrid[y][x] == NOTHING_IN_SQUARE)) {
+    // Fast and play well
+    int emmental = countHolesUnderTheRoof(argrid);
 
-    //            //printf("Penalité emmenthal %d,%d\n", x, y);
-    //            emmenthal++;
-    //        }
-    //    }
-    //}
+    score -= (emmental * 200);  // emmental penalty
 
-    //score -= (emmenthal * 100);
-
-    //if (emmenthal > 0)
+    //if (emmental > 0) {
+    //    printf("Holes:%d\n", emmental);
     //    debugGrid(argrid);
+    //}
 
     return score;
 }
@@ -365,10 +362,74 @@ Ia::debugGrid(int argrid[GRID_H][GRID_W])
                 printf(".");
             } else if (argrid[y][x] == SOMETHING_IN_SQUARE) {
                 printf("*");
+            } else if (argrid[y][x] == FLOODED_IN_SQUARE) {
+                printf("F");
             }
         }
         printf("\n");
     }
+}
+
+inline int
+Ia::floodFill(int grid[GRID_H][GRID_W], int x, int y, int prevC, int newC)
+{
+    queue.clear();
+    p = { x, y };
+    queue.push_back(p);
+
+    // Color the pixel with the new color
+    grid[y][x] = newC;
+
+    // While the queue is not empty i.e. the
+    // whole component having prevC color
+    // is not colored with newC color
+    while (queue.size() > 0) {
+        // Dequeue the front node
+        std::pair<int, int> currPixel = queue[queue.size() - 1];
+        queue.pop_back();
+        int posX = currPixel.first;
+        int posY = currPixel.second;
+
+        if (posY == 0) {
+            // Hole when posY at top
+            return -1;
+        }
+
+        // Check if the adjacent
+        // pixels are valid
+        if (isValid(grid, posX + 1, posY, prevC, newC)) {
+            // Color with newC
+            // if valid and enqueue
+            // argrid[posX + 1][posY] = newC;
+            grid[posY][posX + 1] = newC;
+            p.first = posX + 1;
+            p.second = posY;
+            queue.push_back(p);
+        }
+        if (isValid(grid, posX - 1, posY, prevC, newC)) {
+            // argrid[posX - 1][posY] = newC;
+            grid[posY][posX - 1] = newC;
+            p.first = posX - 1;
+            p.second = posY;
+            queue.push_back(p);
+        }
+        if (isValid(grid, posX, posY + 1, prevC, newC)) {
+            // argrid[posX][posY + 1] = newC;
+            grid[posY + 1][posX] = newC;
+            p.first = posX;
+            p.second = posY + 1;
+            queue.push_back(p);
+        }
+        if (isValid(grid, posX, posY - 1, prevC, newC)) {
+            // argrid[posX][posY - 1] = newC;
+            grid[posY - 1][posX] = newC;
+            p.first = posX;
+            p.second = posY - 1;
+            queue.push_back(p);
+        }
+    }
+
+    return (int)queue.size(); // Hole size
 }
 
 std::stack<Pos>
@@ -419,4 +480,63 @@ Ia::debugStack(std::stack<Pos>& s)
         s.pop();
     }
     printf("\n");
+}
+
+int
+Ia::countHoles(int argrid[GRID_H][GRID_W])
+{
+    int grid[GRID_H][GRID_W];
+    int flooded[GRID_H][GRID_W];
+    // sf::Clock cl;
+    // cl.restart();
+    memcpy(grid, argrid, sizeof(int) * GRID_H * GRID_W);
+    memcpy(flooded, grid, sizeof(int) * GRID_H * GRID_W);
+    for (int x = 0; x < GRID_W; x++) {
+        for (int y = 0; y < GRID_H; y++) {
+            if (flooded[y][x] == NOTHING_IN_SQUARE) {
+
+                memcpy(grid, flooded, sizeof(int) * GRID_H * GRID_W);
+                int c = floodFill(
+                  flooded, x, y, NOTHING_IN_SQUARE, FLOODED_IN_SQUARE);
+                if (c == -1) {
+                    memcpy(flooded, grid, sizeof(int) * GRID_H * GRID_W);
+                }
+            }
+        }
+    }
+    // int64_t time = cl.getElapsedTime().asMicroseconds();
+    // printf("T=%llu\n", time);
+    // debugGrid(grid);
+    //  TODO : COUNT F
+
+    int holes = 0;
+    for (int x = 0; x < GRID_W; x++) {
+        for (int y = 0; y < GRID_H; y++) {
+            if (flooded[y][x] == FLOODED_IN_SQUARE)
+                holes++;
+        }
+    }
+
+    return holes;
+}
+
+int
+Ia::countHolesUnderTheRoof(int argrid[GRID_H][GRID_W])
+{
+    int holes = 0;
+    for (int x = 0; x < GRID_W; x++) {
+        int startCountingHere = -1;
+        for (int y = 0; y < GRID_H; y++) {
+
+            if (startCountingHere == -1 && argrid[y][x] == SOMETHING_IN_SQUARE) {
+                startCountingHere = y;
+            }
+
+            if (startCountingHere >= 0 && argrid[y][x] == NOTHING_IN_SQUARE) {
+                holes++;
+            }
+
+        }
+    }
+    return holes;
 }

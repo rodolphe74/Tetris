@@ -944,14 +944,11 @@ Board::getNextShape()
     for (int i = 1; i < sizeof(m_ishapesQueue) / sizeof(int); i++) {
         m_ishapesQueue[i - 1] = m_ishapesQueue[i];
     }
-    float s =
-      static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 6.0f));
 
-    // DEBUG
-    // float s = 0;
+    int s = rand() % 7;
 
     int lastIndex = sizeof(m_ishapesQueue) / sizeof(int) - 1;
-    m_ishapesQueue[lastIndex] = (int)round(s);
+    m_ishapesQueue[lastIndex] = s;
 
     return shape;
 }
@@ -1217,6 +1214,12 @@ Board::getCurrentLevelMultiplier()
 void
 Board::iaMoveThread()
 {
+    // TODO : everything in IA is static. At this time, only one thread at a
+    // time.
+
+    // TODO : Stop thread when descending shape is near to stop on another.
+    // and keep best scored path.
+
     if (!m_bisComputerMoving && !m_moveComputerThreadAllocated) {
         m_moveComputerThreadAllocated = true;
         m_moveComputerThread = new sf::Thread([this]() {
@@ -1226,18 +1229,17 @@ Board::iaMoveThread()
 
                 Ia::searchCount = 0;
                 Ia::clearStack();
-                Pos posIa =
-                  Ia::findBestPosition(m_argrid,
-                                       m_ishapesQueue,
-                                       m_currentShape,
-                                       m_currentShapeRotation,
-                                       m_currentBottomShiftShape,
-                                       m_currentLeftShiftShape,
-                                       m_currentRightShiftShape,
-                                       m_currentShapeRow,
-                                       m_currentShapeCol,
-                                       AUTOPLAY_DEPTH,
-                                       AUTOPLAY_DEPTH);
+                Pos posIa = Ia::findBestPosition(m_argrid,
+                                                 m_ishapesQueue,
+                                                 m_currentShape,
+                                                 m_currentShapeRotation,
+                                                 m_currentBottomShiftShape,
+                                                 m_currentLeftShiftShape,
+                                                 m_currentRightShiftShape,
+                                                 m_currentShapeRow,
+                                                 m_currentShapeCol,
+                                                 AUTOPLAY_DEPTH,
+                                                 AUTOPLAY_DEPTH);
                 printf("Evaluated positions:%d - Score:%d\n",
                        Ia::searchCount,
                        posIa.score);
