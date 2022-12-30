@@ -80,6 +80,7 @@ class Board
     bool m_boolshouldWarp = 0;
     int m_ishouldCollapse = 0;
     bool m_boolshouldAddLinesToOpponent = 0;
+    bool m_boolshouldStopSearchingThread = 0;
     bool m_boolparticlesLevel = false;
     int m_icountLines = 0;
     int m_icountLinesPerLevel = 0;
@@ -252,6 +253,7 @@ class Board
     bool checkIfCurrentBottomShiftShapeCollide();
     bool checkIfCurrentLeftShiftShapeCollide();
     bool checkIfCurrentRightShiftShapeCollide();
+    bool checkIfCurrentBottomShapeNearToCollide();
     void freezeCurrentShape();
     bool removeFullLines();
     bool removeEmptyLines();

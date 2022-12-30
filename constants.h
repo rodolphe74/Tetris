@@ -56,7 +56,9 @@ constexpr int LEVELF_FONT_SIZE = 24;
 constexpr float QUICK_TIME_MULTIPLIER = 0.08f;
 constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;
 
-constexpr int SLEEP_TIME_BETWEEN_EVERY_MOVE_MS = 200;
-constexpr int AUTOPLAY_DEPTH = 4;
+constexpr int SLEEP_TIME_BETWEEN_EVERY_MOVE_MS = 20;
+constexpr int AUTOPLAY_DEPTH = 5;
+constexpr int DOWNGRADED_AUTOPLAY_DEPTH = 2;
+constexpr int SEARCHING_STOP_THRESHOLD_GAP = 4;
 
 constexpr int64_t SAFETY_ALLOWANCE_DEALLOCATION_TIME_MS = 1000;

@@ -53,10 +53,10 @@ class Ia
     static std::pair<int, int> p;
 
   public:
-    static Pos m_arrpositions[16];
     static std::stack<Pos> m_stackcurrent;
     static std::stack<Pos> m_stacksaved;
-    static int searchCount;
+    static int m_isearchCount;
+    static bool m_boolsearching;
     static Pos findBestPosition(int argrid[GRID_H][GRID_W],
                                 int shapesQueue[SHAPES_QUEUE_SIZE],
                                 int currentShape,

@@ -126,7 +126,7 @@ Board::render(float shiftLeft,
     drawNextShapes();
 
     // Check bounds
-    if (m_currentShapeRow > GRID_H - (m_currentBottomShiftShape + 2 /*5*/)) {
+    if (m_currentShapeRow > GRID_H - (m_currentBottomShiftShape + 2)) {
 
         // allowed time to move away
         if (!m_boolAllowedTimeStarted) {
@@ -229,8 +229,15 @@ Board::render(float shiftLeft,
             // possibly m_boolAllowedTimeStarted : hardening near tetrominoes
             // tests
             if (!checkIfCurrentBottomShiftShapeCollide())
-                if (m_currentShapeRow < GRID_H - m_currentBottomShiftShape - 1)
+                if (m_currentShapeRow <
+                    GRID_H - m_currentBottomShiftShape - 1) {
                     m_currentShapeRow++;
+                    if (m_boolAutoplay &&
+                        checkIfCurrentBottomShapeNearToCollide()) {
+                        printf("Stopping IA thread \n");
+                        Ia::m_boolsearching = false;
+                    }
+                }
 
             bool isPlaced = setCurrentShape(m_currentShape,
                                             m_currentShapeRow,
@@ -434,6 +441,17 @@ Board::checkKeyboard()
         m_boolshouldAddLinesToOpponent) {
         m_boolshouldAddLinesToOpponent = false;
     }
+
+    // DEBUG : stop search thread
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::T) &&
+        !m_boolshouldStopSearchingThread) {
+        Ia::m_boolsearching = false;
+        m_boolshouldStopSearchingThread = true;
+    }
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::T) &&
+        m_boolshouldStopSearchingThread) {
+        m_boolshouldStopSearchingThread = false;
+    }
 }
 
 void
@@ -602,6 +620,34 @@ Board::checkIfCurrentRightShiftShapeCollide()
             }
         }
     }
+    return false;
+}
+
+bool
+Board::checkIfCurrentBottomShapeNearToCollide()
+{
+    int emptyUpper = GRID_H;
+    int yReverse = 0;
+    int checkXGrid = 0;
+    for (int y = 0; y < GRID_H; y++) {
+        yReverse = GRID_H - y;
+        for (int x = 0; x < GRID_W; x++) {
+            if (m_argrid[y][x] == SOMETHING_IN_SQUARE) {
+                checkXGrid = 1;
+                emptyUpper = y;
+                break;
+            }
+        }
+        if (checkXGrid)
+            break;
+    }
+
+    int currentRow = m_currentShapeRow + m_currentBottomShiftShape;
+
+    if (abs(currentRow - emptyUpper) <= SEARCHING_STOP_THRESHOLD_GAP) {
+        return true;
+    }
+
     return false;
 }
 
@@ -1227,8 +1273,12 @@ Board::iaMoveThread()
 
             if (Ia::m_stacksaved.size() == 0) {
 
-                Ia::searchCount = 0;
+                Ia::m_isearchCount = 0;
+                Ia::m_boolsearching = true;
                 Ia::clearStack();
+                printf("Launching ia thread\n");
+                sf::Clock st;
+                st.restart();
                 Pos posIa = Ia::findBestPosition(m_argrid,
                                                  m_ishapesQueue,
                                                  m_currentShape,
@@ -1240,9 +1290,13 @@ Board::iaMoveThread()
                                                  m_currentShapeCol,
                                                  AUTOPLAY_DEPTH,
                                                  AUTOPLAY_DEPTH);
-                printf("Evaluated positions:%d - Score:%d\n",
-                       Ia::searchCount,
-                       posIa.score);
+                int32_t time = st.getElapsedTime().asMilliseconds();
+                printf(
+                  "Evaluated positions at depth %d:%d in %d - Score:%d\n",
+                  AUTOPLAY_DEPTH,
+                  Ia::m_isearchCount,
+                  time,
+                  posIa.score);
                 printf("Stack size %d\n", (int)Ia::m_stackcurrent.size());
 
                 Ia::debugStack();

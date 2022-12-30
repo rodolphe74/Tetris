@@ -2,8 +2,8 @@
 #include "shapes.h"
 #include <vector>
 
-int Ia::searchCount = 0;
-Pos Ia::m_arrpositions[16] = {};
+int Ia::m_isearchCount = 0;
+bool Ia::m_boolsearching = true;
 std::stack<Pos> Ia::m_stackcurrent;
 std::stack<Pos> Ia::m_stacksaved;
 
@@ -83,8 +83,9 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
                      int fullDepth)
 {
 
-    if (currentDepth == 0) {
-        searchCount++;
+
+    if (currentDepth == 0 || !m_boolsearching) {
+        m_isearchCount++;
         int score = getScore(argrid);
         Pos evaluatedPos = { row, col, currentRotation, currentShape, score };
 
