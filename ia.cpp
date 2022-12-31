@@ -1,6 +1,7 @@
 #include "ia.h"
 #include "shapes.h"
 #include <vector>
+#include <stdint.h>
 
 int Ia::m_isearchCount = 0;
 bool Ia::m_boolsearching = true;
@@ -105,7 +106,7 @@ Ia::findBestPosition(int argrid[GRID_H][GRID_W],
     }
 
     // find best score at row
-    int bestScore = 0;
+    int bestScore = INT_MIN;
     int bestCol = 0;
     int bestRow = 0;
     int bestRot = 0;
@@ -461,11 +462,11 @@ Ia::debugStack()
 }
 
 void
-Ia::clearStack()
+Ia::clearStack(int depth)
 {
     m_stacksaved = std::stack<Pos>();
-    for (int i = 0; i < AUTOPLAY_DEPTH + 1; i++)
-        m_stacksaved.push({});
+    for (int i = 0; i < /*AUTOPLAY_DEPTH*/depth + 1; i++)
+        m_stacksaved.push({0, 0, 0, 0, INT_MIN});
 }
 
 void

@@ -232,8 +232,12 @@ Board::render(float shiftLeft,
                 if (m_currentShapeRow <
                     GRID_H - m_currentBottomShiftShape - 1) {
                     m_currentShapeRow++;
+
                     if (m_boolAutoplay &&
+                        m_isearchDepth != DOWNGRADED_AUTOPLAY_DEPTH &&
                         checkIfCurrentBottomShapeNearToCollide()) {
+                        // Stopping only in normal depth since result in
+                        // DOWNGRADED should be fast and doesn't need to sopped
                         printf("Stopping IA thread \n");
                         Ia::m_boolsearching = false;
                     }
@@ -1255,6 +1259,8 @@ float
 Board::getCurrentLevelMultiplier()
 {
     return (float)(1 - 0.03 * m_ilevel);
+    // DEBUG
+    // return QUICK_TIME_MULTIPLIER;
 }
 
 void
@@ -1275,28 +1281,35 @@ Board::iaMoveThread()
 
                 Ia::m_isearchCount = 0;
                 Ia::m_boolsearching = true;
-                Ia::clearStack();
+                Ia::clearStack(m_isearchDepth);
                 printf("Launching ia thread\n");
                 sf::Clock st;
                 st.restart();
-                Pos posIa = Ia::findBestPosition(m_argrid,
-                                                 m_ishapesQueue,
-                                                 m_currentShape,
-                                                 m_currentShapeRotation,
-                                                 m_currentBottomShiftShape,
-                                                 m_currentLeftShiftShape,
-                                                 m_currentRightShiftShape,
-                                                 m_currentShapeRow,
-                                                 m_currentShapeCol,
-                                                 AUTOPLAY_DEPTH,
-                                                 AUTOPLAY_DEPTH);
+
+                // DEBUG
+                if (m_isearchDepth == DOWNGRADED_AUTOPLAY_DEPTH) {
+                    printf("§");
+                }
+
+                Pos posIa =
+                  Ia::findBestPosition(m_argrid,
+                                       m_ishapesQueue,
+                                       m_currentShape,
+                                       m_currentShapeRotation,
+                                       m_currentBottomShiftShape,
+                                       m_currentLeftShiftShape,
+                                       m_currentRightShiftShape,
+                                       m_currentShapeRow,
+                                       m_currentShapeCol,
+                                       /*AUTOPLAY_DEPTH*/ m_isearchDepth,
+                                       /*AUTOPLAY_DEPTH*/ m_isearchDepth);
                 int32_t time = st.getElapsedTime().asMilliseconds();
-                printf(
-                  "Evaluated positions at depth %d:%d in %d - Score:%d\n",
-                  AUTOPLAY_DEPTH,
-                  Ia::m_isearchCount,
-                  time,
-                  posIa.score);
+
+                printf("Evaluated positions at depth %d:%d in %d - Score:%d\n",
+                       m_isearchDepth,
+                       Ia::m_isearchCount,
+                       time,
+                       posIa.score);
                 printf("Stack size %d\n", (int)Ia::m_stackcurrent.size());
 
                 Ia::debugStack();
@@ -1347,6 +1360,15 @@ Board::iaMoveThread()
 
             m_bisComputerMoving = false;
         });
+
+        m_isearchDepth = AUTOPLAY_DEPTH;
+        bool near = checkIfCurrentBottomShapeNearToCollide();
+        printf("near:%d\n", near);
+        if (m_boolAutoplay && m_currentShapeRow <= 2 &&
+            /*checkIfCurrentBottomShapeNearToCollide()*/ near) {
+            printf("DEGRADED !");
+            m_isearchDepth = DOWNGRADED_AUTOPLAY_DEPTH;
+        }
 
         m_moveComputerThread->launch();
     }

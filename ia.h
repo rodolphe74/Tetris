@@ -76,5 +76,5 @@ class Ia
     static void debugGrid(int argrid[GRID_H][GRID_W]);
     static void debugStack();
     static void debugStack(std::stack<Pos>& s);
-    static void clearStack();
+    static void clearStack(int depth);
 };

@@ -85,6 +85,7 @@ class Board
     int m_icountLines = 0;
     int m_icountLinesPerLevel = 0;
     int m_iscore = 0;
+    int m_isearchDepth = AUTOPLAY_DEPTH;
 
     std::string m_strscore = "0";
     std::string m_strcountLines = "0";
