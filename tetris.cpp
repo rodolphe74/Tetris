@@ -86,6 +86,36 @@ gameIntro()
 }
 
 void
+pauseGame()
+{
+    sf::Text t;
+    t.setFont(gameFont);
+    t.setCharacterSize(48);
+    t.setString("Paused game!");
+    t.rotate(-30);
+
+    sf::FloatRect rect = t.getGlobalBounds();
+    t.setPosition(WINDOW_W / 2 - rect.width / 2,
+                  WINDOW_H / 2 - rect.height / 2);
+
+    t.setFillColor(sf::Color::White);
+    window->draw(t);
+
+    humanBoard->m_equeueGameStates.pushFront(GameState::pause);
+    computerBoard->m_equeueGameStates.pushFront(GameState::pause);
+}
+
+void
+unpauseGame()
+{
+    windowPosition = window->getPosition();
+    humanBoard->m_equeueGameStates.purgeQueueFromState(GameState::pause);
+    computerBoard->m_equeueGameStates.purgeQueueFromState(GameState::pause);
+    humanBoard->m_equeueGameStates.pushBack(scrollDown);
+    computerBoard->m_equeueGameStates.pushBack(scrollDown);
+}
+
+void
 init()
 {
     if (!gameFont.loadFromFile("resources/Brick3DRegular-nRJR4.ttf")) {
@@ -118,6 +148,8 @@ init()
 
     window->setFramerateLimit(FRAME_RATE);
     window->setVerticalSyncEnabled(true);
+
+    windowPosition = window->getPosition();
 
     humanBoard = new Board(*window);
     humanBoard->clear();
@@ -204,26 +236,55 @@ main()
                     break;
 
                 case sf::Event::KeyPressed:
+                    // handle pause in game
+                    if (event.key.code == sf::Keyboard::P && !pausedGame &&
+                        waitKeyReleased) {
+                        printf("PAUSE!");
+                        pausedGame = true;
+                    } else if (event.key.code == sf::Keyboard::P &&
+                               pausedGame && waitKeyReleased) {
+                        printf("UNPAUSE!");
+                        pausedGame = false;
+                        unpauseGame();
+                    }
+                    waitKeyReleased = false;
                     break;
 
                 case sf::Event::KeyReleased:
                     if (event.key.code == sf::Keyboard::Left ||
-                        event.key.code == sf::Keyboard::Right)
+                        event.key.code == sf::Keyboard::Right) {
                         humanBoard->m_boolOnceMoveSound = true;
+                        humanBoard->m_ikeyRepeatCount = 0;
+                    }
                     menu->m_boolcanSound = true;
-
-                    // if (event.key.code == sf::Keyboard::F) {
-                    //     Fire::addFire(10, 10, 100, 32, FIRE_TIME);
-                    // }
+                    waitKeyReleased = true;
                     break;
 
                 case sf::Event::Resized:
                     glViewport(0, 0, event.size.width, event.size.height);
                     break;
 
+                case sf::Event::LostFocus:
+                    if (menuStep == SELECTION_MADE &&
+                        humanBoard->m_ecurrentGameState != gameOver &&
+                        computerBoard->m_ecurrentGameState != gameOver) {
+                        pausedGame = true;
+                        waitKeyReleased = true;
+                    }
+                    break;
+
                 default:
                     break;
             }
+        }
+
+        // Pause if window position change
+        if (windowPosition != window->getPosition() &&
+            menuStep == SELECTION_MADE &&
+            humanBoard->m_ecurrentGameState != gameOver &&
+            computerBoard->m_ecurrentGameState != gameOver) {
+            pausedGame = true;
+            waitKeyReleased = true;
         }
 
         int model = humanBoard->m_ilevel % models.size();
@@ -257,19 +318,13 @@ main()
             // Two cases : only human or computer vs human
             if (gameMode == GAME_HUMAN_ALONE) {
                 humanBoard->m_boolAutoplay = false;
-                humanBoard->checkKeyboard();
+                if (!pausedGame)
+                    humanBoard->checkKeyboard();
                 humanBoard->render(
                   WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
                   WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
                   countFrames,
                   FRAME_RATE);
-
-                //// Check m_iarfire deallocation
-                // Fire::freeExtinguishedFires();
-
-                //// Render m_iarfire if needed
-                // Fire::nextFrame(countFrames);
-                // Fire::render(*window);
 
                 // gameover ?
                 if (humanBoard->m_ecurrentGameState == gameOver) {
@@ -284,7 +339,8 @@ main()
             } else {
                 // GAME_HUMAN_VS_COMPUTER
                 humanBoard->m_boolAutoplay = false /* true*/;
-                humanBoard->checkKeyboard();
+                if (!pausedGame)
+                    humanBoard->checkKeyboard();
                 humanBoard->render(
                   3 * (WINDOW_W / 4) - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
                   WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
@@ -334,6 +390,10 @@ main()
                 // queued thread to dealloc ?
                 humanBoard->m_equeueGameStates.sweepFinishedThreads();
                 computerBoard->m_equeueGameStates.sweepFinishedThreads();
+            }
+
+            if (pausedGame) {
+                pauseGame();
             }
         }
 

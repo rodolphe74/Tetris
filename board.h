@@ -86,7 +86,7 @@ class Board
     int m_icountLinesPerLevel = 0;
     int m_iscore = 0;
     int m_isearchDepth = AUTOPLAY_DEPTH;
-
+    
     std::string m_strscore = "0";
     std::string m_strcountLines = "0";
     std::string m_strlevel = "1";
@@ -105,6 +105,7 @@ class Board
     float m_ftimeMultiplier = 1.0f;
     bool m_boolAutoplay = false;
     int m_icountScrolledDown = 0;
+    int m_ikeyRepeatCount = 0;
 
     // Music
     static sf::SoundBuffer m_soundBufferMainOne;
@@ -244,6 +245,7 @@ class Board
                 float shiftHeight,
                 int& framesCount,
                 int frameRate);
+    void drawCurrentShape(float shiftLeft, float shiftHeight);
     void checkKeyboard();
     void drawFreezedAndGhostSquares(float shiftLeft, float shiftHeight);
     void clear();

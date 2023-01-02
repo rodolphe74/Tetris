@@ -56,6 +56,9 @@ static sf::Font gameFont;
 static int counter = -1;
 static int model;
 static int material;
+static bool waitKeyReleased = true;
+static bool pausedGame = false;
+static sf::Vector2<int> windowPosition;
 
 void
 playThemeOne();
@@ -71,6 +74,12 @@ stopCurrentAudioStream();
 
 void
 gameIntro();
+
+void
+pauseGame();
+
+void
+unpauseGame();
 
 void
 init();

@@ -206,22 +206,18 @@ Board::render(float shiftLeft,
     Fire::nextFrame(framesCount);
     Fire::render(*m_prenderWindow);
 
+    // Check pause
+    if (m_ecurrentGameState == pause) {
+        // TODO write PAUSE en travers de la grille
+        drawCurrentShape(shiftLeft, shiftHeight);
+        return;
+    }
+
     // Game states
     if (m_ecurrentGameState == scrollDown) {
 
         // Draw current shape
-        for (int y = 0; y < GRID_H; y++) {
-            for (int x = 0; x < GRID_W; x++) {
-                if (m_arshape[y][x] == SHAPE_IN_SQUARE) {
-                    renderSquare({ (int)shiftLeft + x * PIXEL_SQUARE_SIZE,
-                                   (int)shiftHeight + y * PIXEL_SQUARE_SIZE,
-                                   0,
-                                   0 },
-                                 tt::gShapesColor[m_currentShape],
-                                 false);
-                }
-            }
-        }
+        drawCurrentShape(shiftLeft, shiftHeight);
 
         if (framesCount % ((int)(frameRate * m_ftimeMultiplier)) == 0) {
             clearCurrentShape();
@@ -237,7 +233,7 @@ Board::render(float shiftLeft,
                         m_isearchDepth != DOWNGRADED_AUTOPLAY_DEPTH &&
                         checkIfCurrentBottomShapeNearToCollide()) {
                         // Stopping only in normal depth since result in
-                        // DOWNGRADED should be fast and doesn't need to sopped
+                        // DOWNGRADED should be fast and doesn't need to stopped
                         printf("Stopping IA thread \n");
                         Ia::m_boolsearching = false;
                     }
@@ -269,6 +265,7 @@ Board::render(float shiftLeft,
 
     // Check if full lines to remove
     if (m_ecurrentGameState == scrollLine) {
+        drawCurrentShape(shiftLeft, shiftHeight);
         m_ishouldCollapse++;
         for (int y = 0; y < GRID_H; y++) {
             if (m_arlinesToRemove[y]) {
@@ -308,6 +305,8 @@ Board::render(float shiftLeft,
     }
 
     if (m_ecurrentGameState == collapse) {
+
+        drawCurrentShape(shiftLeft, shiftHeight);
 
         // patch : prevent scrollLine bothering
         m_equeueGameStates.purgeQueueFromState(scrollLine);
@@ -381,21 +380,42 @@ Board::render(float shiftLeft,
 }
 
 void
+Board::drawCurrentShape(float shiftLeft, float shiftHeight)
+{
+    for (int y = 0; y < GRID_H; y++) {
+        for (int x = 0; x < GRID_W; x++) {
+            if (m_arshape[y][x] == SHAPE_IN_SQUARE) {
+                renderSquare({ (int)shiftLeft + x * PIXEL_SQUARE_SIZE,
+                               (int)shiftHeight + y * PIXEL_SQUARE_SIZE,
+                               0,
+                               0 },
+                             tt::gShapesColor[m_currentShape],
+                             false);
+            }
+        }
+    }
+}
+
+void
 Board::checkKeyboard()
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
         m_keyLatencyClock.getElapsedTime().asMilliseconds() >=
-          REPEAT_KEYBOARD_LATENCY_MS &&
+          (m_ikeyRepeatCount == 1 ? REPEAT_KEYBOARD_FIRST_TIME_LATENCY_MS
+                                  : REPEAT_KEYBOARD_LATENCY_MS) &&
         m_ecurrentGameState != none) {
         left();
+        m_ikeyRepeatCount++;
         m_keyLatencyClock.restart();
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
         m_keyLatencyClock.getElapsedTime().asMilliseconds() >=
-          REPEAT_KEYBOARD_LATENCY_MS &&
+          (m_ikeyRepeatCount == 1 ? REPEAT_KEYBOARD_FIRST_TIME_LATENCY_MS
+                                  : REPEAT_KEYBOARD_LATENCY_MS) &&
         m_ecurrentGameState != none) {
         right();
+        m_ikeyRepeatCount++;
         m_keyLatencyClock.restart();
     }
 

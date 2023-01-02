@@ -21,5 +21,6 @@ enum GameState
     collapse,
     scrollUp,
     gameOver,
+    pause,
     undefined
 };
