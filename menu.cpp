@@ -71,8 +71,8 @@ Menu::render()
             sf::RectangleShape selectionBox(
               sf::Vector2f(m_fwidth + 2 * GAP_W, i.getGlobalBounds().height));
             selectionBox.setPosition(WINDOW_W / 2 - box.getSize().x / 2,
-                            WINDOW_H / 2 - m_fheight / 2 + y - i.getGlobalBounds().height /*-
-                              m_vecItems.size() * FONT_LEADING*/);
+                                     WINDOW_H / 2 - m_fheight / 2 + y -
+                                       i.getGlobalBounds().height - A_NUMBER);
 
             selectionBox.setFillColor(sf::Color(255, 0, 0, 64));
             selectionBox.setOutlineColor(sf::Color(255, 0, 0, 64));

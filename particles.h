@@ -26,6 +26,7 @@ class Particles
     int maxIndex = 0;
     void addParticles(float x, float y, int count, int colorScheme);
     void moveParticles();
+    void moveParticles(float mult);
     void cleanParticlesArray();
     void renderParticles(sf::RenderWindow& window);
 };

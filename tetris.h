@@ -7,6 +7,7 @@
 #include "particles.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <queue>
 
 enum menuEnum
 {
@@ -20,7 +21,8 @@ enum gameModeEnum
 {
     WAIT_SELECTION,
     GAME_HUMAN_ALONE,
-    GAME_HUMAN_VS_COMPUTER
+    GAME_HUMAN_VS_COMPUTER,
+    GAME_COMPUTER_ALONE
 };
 
 static menuEnum menuStep = MENU;
@@ -51,6 +53,7 @@ static Board* humanBoard = NULL;
 static Board* computerBoard = NULL;
 static AnimatedBackground* background;
 static Particles particles;
+static std::queue<ParticlePos> particlesQueue;
 static Menu* menu;
 static sf::Font gameFont;
 static int counter = -1;
@@ -91,4 +94,10 @@ void
 newGameIntroOrchestration();
 
 void
-newGameIntroRender(bool isComputerPlaying, int& countFrames);
+newGameIntroRender(int& countFrames);
+
+void
+addParticlesToSendLineFromComputer(int arlinesRemoved[GRID_H]);
+
+void
+addParticlesToSendLineFromHuman(int arlinesRemoved[GRID_H]);

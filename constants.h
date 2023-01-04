@@ -25,6 +25,7 @@
 #define STICKY_TIME_MS 1000
 #define SHAPES_QUEUE_SIZE 6
 #define FIRE_TIME 40
+#define SEND_LINE_PARTICLES_SPEED 10
 
 constexpr float BORDER_W_MULT = 1.70f;
 constexpr float BORDER_H_MULT = 1.03f;

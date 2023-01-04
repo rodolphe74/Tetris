@@ -70,7 +70,7 @@ class Board
     float m_currentShiftHeight = 0;
     int m_currentFrameRate = 30;
     int m_currentFrameCount = 0;
-    int m_arlinesToRemove[GRID_H] = { 0 };
+    /*int m_arlinesToRemove[GRID_H] = { 0 };*/
     int m_arlinesToCollapse[GRID_H] = { 0 };
     float m_currentLineExtension = 0.0f;
     float m_currentLineExtensionStep = 1.0f;
@@ -106,6 +106,7 @@ class Board
     bool m_boolAutoplay = false;
     int m_icountScrolledDown = 0;
     int m_ikeyRepeatCount = 0;
+    int m_arlinesToRemove[GRID_H] = { 0 };
 
     // Music
     static sf::SoundBuffer m_soundBufferMainOne;

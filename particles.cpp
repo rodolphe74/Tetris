@@ -123,6 +123,36 @@ Particles::moveParticles()
 }
 
 void
+Particles::moveParticles(float mult)
+{
+    float delta = 1.0f * mult;
+    float deltaDivTwho = delta / 2.0f;
+    for (int i = 0; i < maxIndex; i++) {
+
+        if (m_pfarlife[i] > 0.0) {
+
+            // Decrease m_pflife
+            m_pfarlife[i] -= (delta / mult);
+            if (m_pfarlife[i] > 0.0) {
+                // printf("  dec %d = %f\n", i, m_pflife[i]);
+                //  Simulate simple physics : gravity only, no collisions
+
+                float g = static_cast<float>(rand()) /
+                          (static_cast<float>(RAND_MAX / 1.0f));
+
+                m_pvglarspeed[i] += sf::Glsl::Vec3(0.0f, g, 0.0f);
+                m_pvglarspeed[i] *= deltaDivTwho;
+                m_pvglarpos[i] += (m_pvglarspeed[i] * delta);
+
+                float rotStep = static_cast<float>(rand()) /
+                                (static_cast<float>(RAND_MAX / 10.0f));
+                m_pfarrotation[i] += rotStep;
+            }
+        }
+    }
+}
+
+void
 Particles::cleanParticlesArray()
 {
     sf::Glsl::Vec3* newpos = new sf::Glsl::Vec3[MAX_PARTICLES_COUNT];

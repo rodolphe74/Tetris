@@ -6,6 +6,7 @@
 #define GAP_W 40
 #define GAP_H 30
 #define SPACING 13
+#define A_NUMBER 6
 #define FONT_LEADING 4.0f
 #define ITEM_HEIGHT_INCREMENT 30
 #define FONT_SIZE 30

@@ -8,7 +8,16 @@ struct Pos
     int score;
 };
 
+struct ParticlePos
+{
+    float x;
+    float y;
+    int count;
+    int colorScheme;
+};
+
 typedef Pos Pos;
+typedef ParticlePos ParticlePos;
 
 enum GameState
 {

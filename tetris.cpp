@@ -169,7 +169,7 @@ init()
     computerBoard->findCurrentBottomShiftShape();
     computerBoard->findCurrentLeftShiftShape();
     computerBoard->findCurrentRightShiftShape();
-    humanBoard->m_equeueGameStates.pushBack(none);
+    computerBoard->m_equeueGameStates.pushBack(none);
     computerBoard->normalSpeed();
 
     background = new AnimatedBackground(*window);
@@ -177,7 +177,8 @@ init()
     menu = new Menu(*window);
     menu->addItem({ "Human alone", 1, sf::Keyboard::F1 });
     menu->addItem({ "Human vs computer", 2, sf::Keyboard::F2 });
-    menu->addItem({ "Exit", 3, sf::Keyboard::F2 });
+    menu->addItem({ "Computer alone", 3, sf::Keyboard::F3 });
+    menu->addItem({ "Exit", 4, sf::Keyboard::F11 });
 }
 
 void
@@ -248,6 +249,19 @@ main()
                         unpauseGame();
                     }
                     waitKeyReleased = false;
+
+                    // DEBUG
+                    if (event.key.code == sf::Keyboard::S) {
+                        int ar[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                     0, 0, 0, 0, 0, 0, 1, 1, 1, 1 };
+                        addParticlesToSendLineFromComputer(ar);
+                    }
+                    if (event.key.code == sf::Keyboard::D) {
+                        int ar[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                     0, 0, 0, 0, 0, 0, 1, 1, 1, 1 };
+                        addParticlesToSendLineFromHuman(ar);
+                    }
+
                     break;
 
                 case sf::Event::KeyReleased:
@@ -307,6 +321,10 @@ main()
                 gameMode = GAME_HUMAN_VS_COMPUTER;
                 newGameIntroOrchestration();
             } else if (item == 3) {
+                menuStep = NEW_GAME;
+                gameMode = GAME_COMPUTER_ALONE;
+                newGameIntroOrchestration();
+            } else if (item == 4) {
                 menuStep = EXIT;
             }
             menu->render();
@@ -336,9 +354,9 @@ main()
 
                 // queued thread to dealloc ?
                 humanBoard->m_equeueGameStates.sweepFinishedThreads();
-            } else {
+            } else if (gameMode == GAME_HUMAN_VS_COMPUTER) {
                 // GAME_HUMAN_VS_COMPUTER
-                humanBoard->m_boolAutoplay = false /* true*/;
+                humanBoard->m_boolAutoplay = false;
                 if (!pausedGame)
                     humanBoard->checkKeyboard();
                 humanBoard->render(
@@ -358,18 +376,16 @@ main()
                 if (humanBoard->m_icountScrolledDown > 1) {
                     int upCount = humanBoard->m_icountScrolledDown - 1;
                     humanBoard->m_icountScrolledDown = 0;
-                    printf("##################### send lines to computer :%d "
-                           "#####################\n",
-                           humanBoard->m_icountScrolledDown - 1);
                     computerBoard->receiveLinesFromOpponent(upCount);
+                    addParticlesToSendLineFromHuman(
+                      humanBoard->m_arlinesToRemove);
                 }
                 if (computerBoard->m_icountScrolledDown > 1) {
                     int upCount = computerBoard->m_icountScrolledDown - 1;
                     computerBoard->m_icountScrolledDown = 0;
-                    printf("##################### send lines to human :%d "
-                           "#####################\n",
-                           computerBoard->m_icountScrolledDown - 1);
                     humanBoard->receiveLinesFromOpponent(upCount);
+                    addParticlesToSendLineFromComputer(
+                      computerBoard->m_arlinesToRemove);
                 }
 
                 // Check if one player is gameOver
@@ -390,16 +406,46 @@ main()
                 // queued thread to dealloc ?
                 humanBoard->m_equeueGameStates.sweepFinishedThreads();
                 computerBoard->m_equeueGameStates.sweepFinishedThreads();
+            } else if (gameMode == GAME_COMPUTER_ALONE) {
+                // GAME_COMPUTER_ALONE
+                computerBoard->m_boolAutoplay = true;
+                computerBoard->render(
+                  WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                  WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                  countFrames,
+                  FRAME_RATE);
+
+                // gameover ?
+                if (computerBoard->m_ecurrentGameState == gameOver) {
+                    // Keeping only gameOver gameState in the queue
+                    computerBoard->m_equeueGameStates.clear();
+                    computerBoard->m_equeueGameStates.pushFront(gameOver);
+                    computerBoard->looser(true);
+                }
+
+                // queued thread to dealloc ?
+                computerBoard->m_equeueGameStates.sweepFinishedThreads();
             }
 
             if (pausedGame) {
                 pauseGame();
             }
+
+            // Particles to draw ?
+            for (int i = 0; i < SEND_LINE_PARTICLES_SPEED; i++) {
+                if (!particlesQueue.empty()) {
+                    ParticlePos p = particlesQueue.front();
+                    particlesQueue.pop();
+                    particles.addParticles(p.x, p.y, p.count, p.colorScheme);
+                }
+            }
+            particles.moveParticles(0.6f);
+            particles.cleanParticlesArray();
+            particles.renderParticles(*window);
         }
 
         if (menuStep == NEW_GAME) {
-            newGameIntroRender(gameMode == GAME_HUMAN_ALONE ? false : true,
-                               countFrames);
+            newGameIntroRender(countFrames);
         }
 
         if (menuStep == EXIT) {
@@ -429,7 +475,7 @@ newGameIntroOrchestration()
 }
 
 void
-newGameIntroRender(bool isComputerPlaying, int& countFrames)
+newGameIntroRender(int& countFrames)
 {
 
     if (gameMode == GAME_HUMAN_ALONE) {
@@ -439,7 +485,7 @@ newGameIntroRender(bool isComputerPlaying, int& countFrames)
                            WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
                            countFrames,
                            FRAME_RATE);
-    } else {
+    } else if (gameMode == GAME_HUMAN_VS_COMPUTER) {
         // GAME_HUMAN_VS_COMPUTER
         humanBoard->m_equeueGameStates.pushBack(none);
         humanBoard->m_waitNextTurn = true;
@@ -452,6 +498,13 @@ newGameIntroRender(bool isComputerPlaying, int& countFrames)
         computerBoard->m_equeueGameStates.pushBack(none);
         computerBoard->m_waitNextTurn = true;
         computerBoard->render(WINDOW_W / 4 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
+                              WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
+                              countFrames,
+                              FRAME_RATE);
+    } else if (gameMode == GAME_COMPUTER_ALONE) {
+        computerBoard->m_equeueGameStates.pushBack(none);
+        computerBoard->m_waitNextTurn = true;
+        computerBoard->render(WINDOW_W / 2 - (GRID_W * PIXEL_SQUARE_SIZE) / 2,
                               WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2,
                               countFrames,
                               FRAME_RATE);
@@ -489,11 +542,74 @@ newGameIntroRender(bool isComputerPlaying, int& countFrames)
         humanBoard->m_equeueGameStates.pushBack(scrollDown);
         humanBoard->m_waitNextTurn = false;
 
-        if (gameMode == GAME_HUMAN_VS_COMPUTER) {
+        if (gameMode == GAME_HUMAN_VS_COMPUTER ||
+            gameMode == GAME_COMPUTER_ALONE) {
             computerBoard->m_equeueGameStates.pushBack(scrollDown);
             computerBoard->m_waitNextTurn = false;
         }
 
         menuStep = SELECTION_MADE;
+    }
+}
+
+void
+addParticlesToSendLineFromComputer(int arlinesRemoved[GRID_H])
+{
+    float mult = 2;
+    float xh = 3 * (WINDOW_W / 4);
+    float xc = WINDOW_W / 4;
+    float step = (xh - xc) / PIXEL_SQUARE_SIZE;
+    step /= mult;
+    int s = 0;
+    for (float i = xc; i < xh; i += PIXEL_SQUARE_SIZE) {
+        for (int h = 0; h < GRID_H; h++) {
+            if (arlinesRemoved[h]) {
+                float yh = (WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2) +
+                           (GRID_H * PIXEL_SQUARE_SIZE) -
+                           PIXEL_SQUARE_SIZE;
+
+                float yc = (WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2) +
+                           ((h + 1.0f) * PIXEL_SQUARE_SIZE) -
+                           PIXEL_SQUARE_SIZE / 2;
+                sf::Vector2f vec = sf::Vector2f(xh - xc, yh - yc);
+                float slope = yh - yc;
+                float incy = slope / step;
+                incy /= mult;
+                ParticlePos p = { i, yc + s * incy, 10, 3 };
+                particlesQueue.push(p);
+            }
+        }
+        s++;
+    }
+}
+
+void
+addParticlesToSendLineFromHuman(int arlinesRemoved[GRID_H])
+{
+    float mult = 2;
+    float xh = 3 * (WINDOW_W / 4);
+    float xc = WINDOW_W / 4;
+    float step = (xh - xc) / PIXEL_SQUARE_SIZE;
+    step /= mult;
+    int s = 0;
+    for (float i = xh; i >= xc; i -= PIXEL_SQUARE_SIZE) {
+        for (int h = 0; h < GRID_H; h++) {
+            if (arlinesRemoved[h]) {
+
+                float yh = (WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2) +
+                           ((h + 1.0f) * PIXEL_SQUARE_SIZE) -
+                           PIXEL_SQUARE_SIZE / 2;
+
+                float yc = (WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2) +
+                           (GRID_H * PIXEL_SQUARE_SIZE) - PIXEL_SQUARE_SIZE;
+                sf::Vector2f vec = sf::Vector2f(xh - xc, yh - yc);
+                float slope = yh - yc;
+                float incy = slope / step;
+                incy /= mult;
+                ParticlePos p = { i, yh - s * incy, 10, 3 };
+                particlesQueue.push(p);
+            }
+        }
+        s++;
     }
 }
