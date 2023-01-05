@@ -144,6 +144,7 @@ Board::render(float shiftLeft,
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
+            m_isearchDepth = AUTOPLAY_DEPTH_REGARDING_ALT[getAltitude()];
             m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_boolAllowedTimeStarted = false;
             m_boolCanAccelerate = false;
@@ -170,6 +171,7 @@ Board::render(float shiftLeft,
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
+            m_isearchDepth = AUTOPLAY_DEPTH_REGARDING_ALT[getAltitude()];
             m_ftimeMultiplier = getCurrentLevelMultiplier();
             m_boolAllowedTimeStarted = false;
             m_boolCanAccelerate = false;
@@ -230,8 +232,9 @@ Board::render(float shiftLeft,
                     m_currentShapeRow++;
 
                     if (m_boolAutoplay &&
-                        m_isearchDepth != DOWNGRADED_AUTOPLAY_DEPTH &&
-                        checkIfCurrentBottomShapeNearToCollide()) {
+                        m_isearchDepth > DOWNGRADED_AUTOPLAY_DEPTH
+
+                        && checkIfCurrentBottomShapeNearToCollide()) {
                         // Stopping only in normal depth since result in
                         // DOWNGRADED should be fast and doesn't need to stopped
                         printf("Stopping IA thread \n");
@@ -353,6 +356,7 @@ Board::render(float shiftLeft,
         // in case of AUTOPLAY authorize computer to play next shape after
         // lines scrolling down effect
         m_waitNextTurn = false;
+        m_isearchDepth = AUTOPLAY_DEPTH_REGARDING_ALT[getAltitude()];
         m_equeueGameStates.pushBack(scrollDown);
     }
 
@@ -675,6 +679,27 @@ Board::checkIfCurrentBottomShapeNearToCollide()
     return false;
 }
 
+int
+Board::getAltitude()
+{
+    int emptyUpper = GRID_H;
+    int yReverse = 0;
+    int checkXGrid = 0;
+    for (int y = 0; y < GRID_H; y++) {
+        yReverse = GRID_H - y;
+        for (int x = 0; x < GRID_W; x++) {
+            if (m_argrid[y][x] == SOMETHING_IN_SQUARE) {
+                checkXGrid = 1;
+                emptyUpper = y;
+                break;
+            }
+        }
+        if (checkXGrid)
+            break;
+    }
+    return GRID_H - emptyUpper;
+}
+
 void
 Board::freezeCurrentShape()
 {
@@ -859,6 +884,7 @@ Board::scrollEverythingUp(int fromLine)
 
         setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
         findCurrentBottomShiftShape();
+        m_isearchDepth = AUTOPLAY_DEPTH_REGARDING_ALT[getAltitude()];
         m_ftimeMultiplier = getCurrentLevelMultiplier();
         m_boolAllowedTimeStarted = false;
         m_boolCanAccelerate = false;
@@ -962,6 +988,7 @@ Board::warp()
 
     setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
     findCurrentBottomShiftShape();
+    m_isearchDepth = AUTOPLAY_DEPTH_REGARDING_ALT[getAltitude()];
     m_ftimeMultiplier = getCurrentLevelMultiplier();
     m_boolAllowedTimeStarted = false;
     m_boolCanAccelerate = false;
@@ -1225,6 +1252,7 @@ Board::downSpecifics()
 
             setCurrentShape(getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
             findCurrentBottomShiftShape();
+            m_isearchDepth = AUTOPLAY_DEPTH_REGARDING_ALT[getAltitude()];
             // m_ftimeMultiplier = NORMAL_TIME_MULTIPLIER - (m_ilevel * 0.2f);
             // m_ftimeMultiplier = getNextLevelMultiplier();
             m_ftimeMultiplier = getCurrentLevelMultiplier();
@@ -1289,7 +1317,7 @@ Board::iaMoveThread()
     // TODO : everything in IA is static. At this time, only one thread at a
     // time.
 
-    // TODO : Stop thread when descending shape is near to stop on another.
+    // Stop thread when descending shape is near to stop on another.
     // and keep best scored path.
 
     if (!m_bisComputerMoving && !m_moveComputerThreadAllocated) {
@@ -1305,11 +1333,6 @@ Board::iaMoveThread()
                 printf("Launching ia thread\n");
                 sf::Clock st;
                 st.restart();
-
-                // DEBUG
-                if (m_isearchDepth == DOWNGRADED_AUTOPLAY_DEPTH) {
-                    printf("§");
-                }
 
                 Pos posIa =
                   Ia::findBestPosition(m_argrid,
@@ -1381,14 +1404,7 @@ Board::iaMoveThread()
             m_bisComputerMoving = false;
         });
 
-        m_isearchDepth = AUTOPLAY_DEPTH;
-        bool near = checkIfCurrentBottomShapeNearToCollide();
-        printf("near:%d\n", near);
-        if (m_boolAutoplay && m_currentShapeRow <= 2 &&
-            /*checkIfCurrentBottomShapeNearToCollide()*/ near) {
-            printf("DEGRADED !");
-            m_isearchDepth = DOWNGRADED_AUTOPLAY_DEPTH;
-        }
+        printf("Launching thread with depth %d\n", m_isearchDepth);
 
         m_moveComputerThread->launch();
     }

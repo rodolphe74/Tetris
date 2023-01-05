@@ -85,7 +85,7 @@ class Board
     int m_icountLines = 0;
     int m_icountLinesPerLevel = 0;
     int m_iscore = 0;
-    int m_isearchDepth = AUTOPLAY_DEPTH;
+    
     
     std::string m_strscore = "0";
     std::string m_strcountLines = "0";
@@ -107,6 +107,7 @@ class Board
     int m_icountScrolledDown = 0;
     int m_ikeyRepeatCount = 0;
     int m_arlinesToRemove[GRID_H] = { 0 };
+    int m_isearchDepth = AUTOPLAY_DEPTH;
 
     // Music
     static sf::SoundBuffer m_soundBufferMainOne;
@@ -258,6 +259,7 @@ class Board
     bool checkIfCurrentLeftShiftShapeCollide();
     bool checkIfCurrentRightShiftShapeCollide();
     bool checkIfCurrentBottomShapeNearToCollide();
+    int getAltitude();
     void freezeCurrentShape();
     bool removeFullLines();
     bool removeEmptyLines();

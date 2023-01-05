@@ -61,6 +61,8 @@ constexpr float NORMAL_TIME_MULTIPLIER = 1.0f;
 constexpr int SLEEP_TIME_BETWEEN_EVERY_MOVE_MS = 100;
 constexpr int AUTOPLAY_DEPTH = 5;
 constexpr int DOWNGRADED_AUTOPLAY_DEPTH = 3;
+constexpr int AUTOPLAY_DEPTH_REGARDING_ALT[] = { 5, 5, 5, 5, 5, 4, 4, 4, 4, 4,
+                                                 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 };
 constexpr int SEARCHING_STOP_THRESHOLD_GAP = 4;
 
 constexpr int64_t SAFETY_ALLOWANCE_DEALLOCATION_TIME_MS = 1000;

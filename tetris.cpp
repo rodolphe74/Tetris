@@ -156,6 +156,8 @@ init()
     humanBoard->setCurrentShape(
       humanBoard->getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
     humanBoard->findCurrentBottomShiftShape();
+    printf("Alt:%d\n", humanBoard->getAltitude());
+    humanBoard->m_isearchDepth = AUTOPLAY_DEPTH_REGARDING_ALT[humanBoard->getAltitude()];
     humanBoard->findCurrentLeftShiftShape();
     humanBoard->findCurrentRightShiftShape();
     humanBoard->m_equeueGameStates.pushBack(none);
@@ -167,6 +169,9 @@ init()
     computerBoard->setCurrentShape(
       computerBoard->getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
     computerBoard->findCurrentBottomShiftShape();
+    printf("Alt:%d\n", computerBoard->getAltitude());
+    computerBoard->m_isearchDepth =
+      AUTOPLAY_DEPTH_REGARDING_ALT[humanBoard->getAltitude()];
     computerBoard->findCurrentLeftShiftShape();
     computerBoard->findCurrentRightShiftShape();
     computerBoard->m_equeueGameStates.pushBack(none);
