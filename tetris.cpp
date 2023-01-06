@@ -11,7 +11,7 @@ playThemeOne()
     audioStream.load(soundBufferMainOne);
     audioStream.play();
     audioStream.isPlaying = true;
-    currentPlayingTheme == 1; 
+    currentPlayingTheme = 1;
     while (currentPlayingTheme == 1 &&
            audioStream.getStatus() == AudioStream::Playing) {
         sf::sleep(sf::seconds(0.1f));
@@ -312,8 +312,15 @@ main()
             waitKeyReleased = true;
         }
 
-        int model = humanBoard->m_ilevel % models.size();
-        int material = humanBoard->m_ilevel % materials.size();
+        int model, material;
+        if (gameMode != GAME_COMPUTER_ALONE) {
+            model = humanBoard->m_ilevel % models.size();
+            material = humanBoard->m_ilevel % materials.size();
+        } else {
+            model = computerBoard->m_ilevel % models.size();
+            material = computerBoard->m_ilevel % materials.size();
+        }
+
         background->renderBackground(models.at(model) + 1,
                                      (const size_t)models.at(model)[0],
                                      materials.at(material));
