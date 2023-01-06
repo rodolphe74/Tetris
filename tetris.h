@@ -46,6 +46,7 @@ static sf::Clock newGameAnimWait;
 static int currentPlayingTheme = -1;
 static sf::Thread* musicThread = NULL;
 static sf::Thread* introThread = NULL;
+static bool isThemePlaying = false;
 static sf::ContextSettings contextSettings;
 static sf::Event event;
 static sf::RenderWindow* window;

@@ -10,13 +10,15 @@ playThemeOne()
     AudioStream audioStream;
     audioStream.load(soundBufferMainOne);
     audioStream.play();
-    currentPlayingTheme = 1;
     audioStream.isPlaying = true;
+    currentPlayingTheme == 1; 
     while (currentPlayingTheme == 1 &&
            audioStream.getStatus() == AudioStream::Playing) {
         sf::sleep(sf::seconds(0.1f));
         background->m_unPeuDeRhythme = audioStream.m_fpeakAmp;
     }
+    audioStream.isPlaying = false;
+    isThemePlaying = false;
 }
 
 void
@@ -25,14 +27,15 @@ playThemeTwo()
     AudioStream audioStream;
     audioStream.load(soundBufferMainTwo);
     audioStream.play();
-    currentPlayingTheme = 2;
     audioStream.isPlaying = true;
+    currentPlayingTheme = 2;
     while (currentPlayingTheme == 2 &&
            audioStream.getStatus() == AudioStream::Playing) {
         sf::sleep(sf::seconds(0.1f));
         background->m_unPeuDeRhythme = audioStream.m_fpeakAmp;
     }
     audioStream.isPlaying = false;
+    isThemePlaying = false;
 }
 
 void
@@ -157,7 +160,8 @@ init()
       humanBoard->getNextShape(), 0, GRID_W / 2 - SHAPE_SIZE / 2, 0);
     humanBoard->findCurrentBottomShiftShape();
     printf("Alt:%d\n", humanBoard->getAltitude());
-    humanBoard->m_isearchDepth = AUTOPLAY_DEPTH_REGARDING_ALT[humanBoard->getAltitude()];
+    humanBoard->m_isearchDepth =
+      AUTOPLAY_DEPTH_REGARDING_ALT[humanBoard->getAltitude()];
     humanBoard->findCurrentLeftShiftShape();
     humanBoard->findCurrentRightShiftShape();
     humanBoard->m_equeueGameStates.pushBack(none);
@@ -228,6 +232,8 @@ main()
 
     // Start game
     if (menuStep == MENU) {
+        isThemePlaying = true;
+        currentPlayingTheme = 3;
         musicThread = new sf::Thread(&playThemeThree);
         musicThread->launch();
     }
@@ -436,6 +442,28 @@ main()
                 pauseGame();
             }
 
+            if (isThemePlaying == false && currentPlayingTheme == 1) {
+                if (musicThread != NULL) {
+                    delete musicThread;
+                    musicThread = NULL;
+                }
+                isThemePlaying = true;
+                currentPlayingTheme = 2;
+                musicThread = new sf::Thread(&playThemeTwo);
+                musicThread->launch();
+            }
+
+            if (isThemePlaying == false && currentPlayingTheme == 2) {
+                if (musicThread != NULL) {
+                    delete musicThread;
+                    musicThread = NULL;
+                }
+                isThemePlaying = true;
+                currentPlayingTheme = 1;
+                musicThread = new sf::Thread(&playThemeOne);
+                musicThread->launch();
+            }
+
             // Particles to draw ?
             for (int i = 0; i < SEND_LINE_PARTICLES_SPEED; i++) {
                 if (!particlesQueue.empty()) {
@@ -541,6 +569,8 @@ newGameIntroRender(int& countFrames)
     if (newGameAnimWait.getElapsedTime().asMilliseconds() >= 4000) {
         delete introThread;
         introThread = NULL;
+        isThemePlaying = true;
+        currentPlayingTheme = 1;
         musicThread = new sf::Thread(&playThemeOne);
         musicThread->launch();
 
@@ -570,8 +600,7 @@ addParticlesToSendLineFromComputer(int arlinesRemoved[GRID_H])
         for (int h = 0; h < GRID_H; h++) {
             if (arlinesRemoved[h]) {
                 float yh = (WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2) +
-                           (GRID_H * PIXEL_SQUARE_SIZE) -
-                           PIXEL_SQUARE_SIZE;
+                           (GRID_H * PIXEL_SQUARE_SIZE) - PIXEL_SQUARE_SIZE;
 
                 float yc = (WINDOW_H / 2 - (GRID_H * PIXEL_SQUARE_SIZE) / 2) +
                            ((h + 1.0f) * PIXEL_SQUARE_SIZE) -
