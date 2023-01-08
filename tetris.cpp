@@ -215,8 +215,22 @@ freeAndExit()
     delete window;
 }
 
-int
-main()
+#if defined(_WINDOWS) && defined(NDEBUG)
+int WINAPI
+WinMain(_In_ HINSTANCE hThisInstance,
+        _In_opt_ HINSTANCE hPrevInstance,
+        _In_ LPSTR lpszArgument,
+        _In_ int nCmdShow)
+#endif
+
+#if defined(_WINDOWS) && !defined(NDEBUG)
+  int main()
+#endif
+
+#if !defined(_WINDOWS)
+    int main()
+#endif
+
 {
     init();
 

@@ -221,7 +221,12 @@ Board::render(float shiftLeft,
         // Draw current shape
         drawCurrentShape(shiftLeft, shiftHeight);
 
-        if (framesCount % ((int)(frameRate * m_ftimeMultiplier)) == 0) {
+        // avoid division by zero - maxspeed when frameRate * m_ftimeMultiplier
+        // casting must be greater than 0
+        if (framesCount %
+              (int)(frameRate *
+                    (m_ftimeMultiplier < 0.02f ? 0.02f : m_ftimeMultiplier)) ==
+            0) {
             clearCurrentShape();
 
             // possibly m_boolAllowedTimeStarted : hardening near tetrominoes

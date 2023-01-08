@@ -193,7 +193,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>C:/Users/rodoc/HOME/developpement/visual/Tetris/Release/tetris.lib</ImportLibrary>
       <ProgramDataBaseFile>C:/Users/rodoc/HOME/developpement/visual/Tetris/Release/tetris.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
