@@ -29,6 +29,7 @@ enum GameState
     scrollLine,
     collapse,
     scrollUp,
+    preGameOver,
     gameOver,
     pause,
     undefined

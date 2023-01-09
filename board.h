@@ -18,6 +18,7 @@ class Board
     int m_argrid[GRID_H][GRID_W];
     int m_arghost[GRID_H][GRID_W];
     int m_arshape[GRID_H][GRID_W];
+    int m_argameOverShape[GRID_H][GRID_W];
 
     // Graphics
     sf::RenderWindow* m_prenderWindow;
@@ -122,6 +123,7 @@ class Board
                 m_argrid[y][x] = NOTHING_IN_SQUARE;
                 m_arghost[y][x] = NOTHING_IN_SQUARE;
                 m_arshape[y][x] = NOTHING_IN_SQUARE;
+                m_argameOverShape[y][x] = NOTHING_IN_SQUARE;
             }
         }
 
@@ -243,11 +245,15 @@ class Board
     void renderSmallSquare(const tt::rect& squareRect, const sf::Color& color);
     void renderMediumSquare(const tt::rect& squareRect, const sf::Color& color);
     bool setCurrentShape(int shapeIndex, int row, int col, int currentRotation);
+    void setGameOverShape(int shapeIndex, int row, int col, int currentRotation);
     void render(float shiftLeft,
                 float shiftHeight,
                 int& framesCount,
                 int frameRate);
     void drawCurrentShape(float shiftLeft, float shiftHeight);
+    void drawGameOverShape(float shiftLeft,
+                          float shiftHeight,
+                          const sf::Color& color);
     void checkKeyboard();
     void drawFreezedAndGhostSquares(float shiftLeft, float shiftHeight);
     void clear();

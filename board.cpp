@@ -69,6 +69,21 @@ Board::setCurrentShape(int shapeIndex, int row, int col, int rotation)
 }
 
 void
+Board::setGameOverShape(int shapeIndex, int row, int col, int rotation)
+{
+    const int* shape = tt::gShapesArray[shapeIndex][rotation];
+    int squarecount = 0;
+    for (int y = row; y < SHAPE_SIZE + row; y++) {
+        for (int x = col; x < SHAPE_SIZE + col; x++) {
+            if (y < GRID_H && x < GRID_W && shape[squarecount] == 1) {
+                m_argameOverShape[y][x] = SHAPE_IN_SQUARE;
+            }
+            squarecount++;
+        }
+    }
+}
+
+void
 Board::render(float shiftLeft,
               float shiftHeight,
               int& framesCount,
@@ -218,56 +233,91 @@ Board::render(float shiftLeft,
     // Game states
     if (m_ecurrentGameState == scrollDown) {
 
-        // Draw current shape
-        drawCurrentShape(shiftLeft, shiftHeight);
+        // Check game over
+        bool isPlaced = setCurrentShape(m_currentShape,
+                                        m_currentShapeRow,
+                                        m_currentShapeCol,
+                                        m_currentShapeRotation);
+        if (!isPlaced) {
+            // shape doesn't fit (and wasn't set by setCurrentShape)
+            m_ecurrentGameState = preGameOver;
+            setGameOverShape(m_currentShape,
+                             m_currentShapeRow,
+                             m_currentShapeCol,
+                             m_currentShapeRotation);
+            m_waitClock.restart(); // use the global wait clock
+            m_equeueGameStates.pushFront(preGameOver);
+        } else {
+            // Draw current shape
+            drawCurrentShape(shiftLeft, shiftHeight);
 
-        // avoid division by zero - maxspeed when frameRate * m_ftimeMultiplier
-        // casting must be greater than 0
-        if (framesCount %
-              (int)(frameRate *
-                    (m_ftimeMultiplier < 0.02f ? 0.02f : m_ftimeMultiplier)) ==
-            0) {
-            clearCurrentShape();
+            // avoid division by zero - maxspeed when frameRate *
+            // m_ftimeMultiplier casting must be greater than 0
+            printf("%d %f\n",
+                   (int)round(frameRate * (m_ftimeMultiplier < 0.02f
+                                             ? 0.02f
+                                             : m_ftimeMultiplier)),
+                   (frameRate *
+                    (m_ftimeMultiplier < 0.02f ? 0.02f : m_ftimeMultiplier)));
+            if (framesCount % (int)round(frameRate * (m_ftimeMultiplier < 0.02f
+                                                        ? 0.02f
+                                                        : m_ftimeMultiplier)) ==
+                0) {
+                clearCurrentShape();
 
-            // possibly m_boolAllowedTimeStarted : hardening near tetrominoes
-            // tests
-            if (!checkIfCurrentBottomShiftShapeCollide())
-                if (m_currentShapeRow <
-                    GRID_H - m_currentBottomShiftShape - 1) {
-                    m_currentShapeRow++;
+                // possibly m_boolAllowedTimeStarted : hardening near
+                // tetrominoes tests
+                if (!checkIfCurrentBottomShiftShapeCollide())
+                    if (m_currentShapeRow <
+                        GRID_H - m_currentBottomShiftShape - 1) {
+                        m_currentShapeRow++;
 
-                    if (m_boolAutoplay &&
-                        m_isearchDepth > DOWNGRADED_AUTOPLAY_DEPTH
+                        if (m_boolAutoplay &&
+                            m_isearchDepth > DOWNGRADED_AUTOPLAY_DEPTH
 
-                        && checkIfCurrentBottomShapeNearToCollide()) {
-                        // Stopping only in normal depth since result in
-                        // DOWNGRADED should be fast and doesn't need to stopped
-                        printf("Stopping IA thread \n");
-                        Ia::m_boolsearching = false;
-                    }
-                }
-
-            bool isPlaced = setCurrentShape(m_currentShape,
-                                            m_currentShapeRow,
-                                            m_currentShapeCol,
-                                            m_currentShapeRotation);
-
-            if (!isPlaced) {
-                // Game Over effect
-                for (int y = 0; y < GRID_H; y++) {
-                    for (int x = 0; x < GRID_W; x++) {
-                        if (m_argrid[y][x] == SOMETHING_IN_SQUARE) {
-                            sf::Vector2f v = sf::Vector2f(
-                              m_currentShiftLeft + x * PIXEL_SQUARE_SIZE,
-                              m_currentShiftHeight + y * PIXEL_SQUARE_SIZE);
-                            m_particles.addParticles(v.x, v.y, 10, 1);
-                            m_argrid[y][x] = GAME_OVER_SQUARE;
+                            && checkIfCurrentBottomShapeNearToCollide()) {
+                            // Stopping only in normal depth since result in
+                            // DOWNGRADED should be fast and doesn't need to
+                            // stopped
+                            printf("Stopping IA thread \n");
+                            Ia::m_boolsearching = false;
                         }
                     }
-                }
-                m_equeueGameStates.pushBack(gameOver);
-                m_soundGameOver.play();
             }
+        }
+    }
+
+    if (m_ecurrentGameState == preGameOver) {
+        // Show shape that can't be positionned
+        if (m_waitClock.getElapsedTime().asMilliseconds() <
+            BLINK_GAME_OVER_TIME_EFFECT_MS) {
+            // Blink effect
+            if (m_currentFrameCount % BLINK_GAME_OVER_SPEED == 0) {
+                drawGameOverShape(
+                  m_currentShiftLeft, m_currentShiftHeight, sf::Color::Red);
+            } else {
+                drawGameOverShape(
+                  m_currentShiftLeft, m_currentShiftHeight, sf::Color::Blue);
+            }
+            m_equeueGameStates.pushFront(preGameOver);
+
+        } else {
+            // And particles effect
+            for (int y = 0; y < GRID_H; y++) {
+                for (int x = 0; x < GRID_W; x++) {
+                    if (m_argrid[y][x] == SOMETHING_IN_SQUARE) {
+                        sf::Vector2f v = sf::Vector2f(
+                          m_currentShiftLeft + x * PIXEL_SQUARE_SIZE,
+                          m_currentShiftHeight + y * PIXEL_SQUARE_SIZE);
+                        m_particles.addParticles(v.x, v.y, 10, 1);
+                        m_argrid[y][x] = GAME_OVER_SQUARE;
+                    }
+                }
+            }
+
+            // Then real gameOver
+            m_equeueGameStates.pushFront(gameOver);
+            m_soundGameOver.play();
         }
     }
 
@@ -406,8 +456,31 @@ Board::drawCurrentShape(float shiftLeft, float shiftHeight)
 }
 
 void
+Board::drawGameOverShape(float shiftLeft,
+                         float shiftHeight,
+                         const sf::Color& color)
+{
+    for (int y = 0; y < GRID_H; y++) {
+        for (int x = 0; x < GRID_W; x++) {
+            if (m_argameOverShape[y][x] == SHAPE_IN_SQUARE) {
+                renderSquare({ (int)shiftLeft + x * PIXEL_SQUARE_SIZE,
+                               (int)shiftHeight + y * PIXEL_SQUARE_SIZE,
+                               0,
+                               0 },
+                             color,
+                             false);
+            }
+        }
+    }
+}
+
+void
 Board::checkKeyboard()
 {
+    if (m_ecurrentGameState == gameOver || m_ecurrentGameState == preGameOver) {
+        return;
+    }
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
         m_keyLatencyClock.getElapsedTime().asMilliseconds() >=
           (m_ikeyRepeatCount == 1 ? REPEAT_KEYBOARD_FIRST_TIME_LATENCY_MS
@@ -465,26 +538,26 @@ Board::checkKeyboard()
     }
 
     // DEBUG : add line to opponent
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) &&
-        !m_boolshouldAddLinesToOpponent) {
-        receiveLinesFromOpponent(4);
-        m_boolshouldAddLinesToOpponent = true;
-    }
-    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) &&
-        m_boolshouldAddLinesToOpponent) {
-        m_boolshouldAddLinesToOpponent = false;
-    }
+    // if (sf::Keyboard::isKeyPressed(sf::Keyboard::I) &&
+    //    !m_boolshouldAddLinesToOpponent) {
+    //    receiveLinesFromOpponent(4);
+    //    m_boolshouldAddLinesToOpponent = true;
+    //}
+    // if (!sf::Keyboard::isKeyPressed(sf::Keyboard::I) &&
+    //    m_boolshouldAddLinesToOpponent) {
+    //    m_boolshouldAddLinesToOpponent = false;
+    //}
 
     // DEBUG : stop search thread
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::T) &&
-        !m_boolshouldStopSearchingThread) {
-        Ia::m_boolsearching = false;
-        m_boolshouldStopSearchingThread = true;
-    }
-    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::T) &&
-        m_boolshouldStopSearchingThread) {
-        m_boolshouldStopSearchingThread = false;
-    }
+    // if (sf::Keyboard::isKeyPressed(sf::Keyboard::T) &&
+    //    !m_boolshouldStopSearchingThread) {
+    //    Ia::m_boolsearching = false;
+    //    m_boolshouldStopSearchingThread = true;
+    //}
+    // if (!sf::Keyboard::isKeyPressed(sf::Keyboard::T) &&
+    //    m_boolshouldStopSearchingThread) {
+    //    m_boolshouldStopSearchingThread = false;
+    //}
 }
 
 void
@@ -1313,7 +1386,7 @@ Board::getCurrentLevelMultiplier()
 {
     return (float)(1 - 0.03 * m_ilevel);
     // DEBUG
-    // return QUICK_TIME_MULTIPLIER;
+    // return 0.03f;
 }
 
 void
@@ -1377,6 +1450,12 @@ Board::iaMoveThread()
                    leftCount,
                    rightCount,
                    rotateCount);
+
+            // Check game over before moving shape
+            if (m_ecurrentGameState == preGameOver ||
+                m_ecurrentGameState == gameOver) {
+                return;
+            }
 
             // Move shape with human clumsiness and slow speed
             if (rotateCount > 0) {
