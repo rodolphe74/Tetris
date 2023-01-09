@@ -253,12 +253,12 @@ Board::render(float shiftLeft,
 
             // avoid division by zero - maxspeed when frameRate *
             // m_ftimeMultiplier casting must be greater than 0
-            printf("%d %f\n",
-                   (int)round(frameRate * (m_ftimeMultiplier < 0.02f
-                                             ? 0.02f
-                                             : m_ftimeMultiplier)),
-                   (frameRate *
-                    (m_ftimeMultiplier < 0.02f ? 0.02f : m_ftimeMultiplier)));
+            //printf("%d %f\n",
+            //       (int)round(frameRate * (m_ftimeMultiplier < 0.02f
+            //                                 ? 0.02f
+            //                                 : m_ftimeMultiplier)),
+            //       (frameRate *
+            //        (m_ftimeMultiplier < 0.02f ? 0.02f : m_ftimeMultiplier)));
             if (framesCount % (int)round(frameRate * (m_ftimeMultiplier < 0.02f
                                                         ? 0.02f
                                                         : m_ftimeMultiplier)) ==

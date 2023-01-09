@@ -6,7 +6,7 @@
 #define GRID_W 10
 #define GRID_H 20
 #define PIXEL_SQUARE_SIZE 24
-#define PIXEL_ASTER_SIZE 8
+#define PIXEL_ASTER_SIZE 11
 #define PIXEL_FOG_SIZE 100
 #define FOG_SHIFT_UP 80
 #define SHAPE_IN_SQUARE -1
