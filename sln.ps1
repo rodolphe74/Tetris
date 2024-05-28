@@ -1,1 +1,1 @@
-cmake . -DCMAKE_TOOLCHAIN_FILE=C:\Users\rodoc\HOME\developpement\visual\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake . -DCMAKE_TOOLCHAIN_FILE=C:\Users\rodoc\HOME\developpement\vcpkg\scripts\buildsystems\vcpkg.cmake

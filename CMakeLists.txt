@@ -4,7 +4,11 @@ project(Tetris)
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 set(OpenGL_GL_PREFERENCE LEGACY) # Linux OpenGL
 find_package(OpenGL REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(FLAC CONFIG REQUIRED)
+find_package(OpenAL CONFIG REQUIRED)
+find_package(Vorbis CONFIG REQUIRED) 
 
 add_executable(tetris tetris.cpp board.cpp animatedBackground.cpp particles.cpp fog.cpp audioStream.cpp menu.cpp ia.cpp gameStatesQueue.cpp fire.cpp)
 
-target_link_libraries(tetris PRIVATE sfml-system sfml-network sfml-graphics sfml-window sfml-audio ${OPENGL_LIBRARY})
+target_link_libraries(tetris PRIVATE sfml-system sfml-network sfml-graphics sfml-window sfml-audio ${OPENGL_LIBRARY} glm::glm-header-only FLAC::FLAC OpenAL::OpenAL Vorbis::vorbis Vorbis::vorbisfile Vorbis::vorbisenc)

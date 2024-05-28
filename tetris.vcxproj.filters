@@ -31,6 +31,7 @@
     <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\fire.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\CMakeLists.txt" />
@@ -39,5 +40,8 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{BCA19BFA-47D4-3205-A6A2-1707B6608360}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="game.h" />
   </ItemGroup>
 </Project>
