@@ -10,6 +10,10 @@
 #include <SFML/Graphics.hpp>
 #include <queue>
 
+#if defined(__APPLE__)
+#include <CoreFoundation/CoreFoundation.h>
+#include <iostream>
+#endif
 
 
 class game
@@ -82,6 +86,12 @@ class game
     void pauseGame();
     void unpauseGame();
     void init();
+    
+#ifdef __APPLE__
+    void getResourcePath(const CFStringRef resourceName, char *resourcePath);
+    void initApple();
+#endif
+    
     void newGameIntroOrchestration();
     void newGameIntroRender(int& countFrames);
     void addParticlesToSendLineFromComputer(int arlinesRemoved[GRID_H]);

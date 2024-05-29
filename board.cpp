@@ -5,11 +5,6 @@
 #include "shapes.h"
 #include <string>
 
-// Static members
-sf::SoundBuffer Board::m_soundBufferMainTwo;
-sf::SoundBuffer Board::m_soundBufferMainOne;
-AudioStream Board::m_audioStream;
-
 void
 Board::renderSquare(const tt::rect& squareRect,
                     const sf::Color& color,
@@ -224,7 +219,7 @@ Board::render(float shiftLeft,
     Fire::render(*m_prenderWindow);
 
     // Check pause
-    if (m_ecurrentGameState == pause) {
+    if (m_ecurrentGameState == paused) {
         // TODO write PAUSE en travers de la grille
         drawCurrentShape(shiftLeft, shiftHeight);
         return;

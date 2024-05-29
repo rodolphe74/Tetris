@@ -31,6 +31,6 @@ enum GameState
     scrollUp,
     preGameOver,
     gameOver,
-    pause,
+    paused,
     undefined
 };

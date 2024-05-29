@@ -1,7 +1,14 @@
 #pragma once
 
 #include <array>
+
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
+#include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 
 // clang-format off
 constexpr float emerald[] = { 0.0215f, 0.1745f, 0.0215f, 0.07568f, 0.61424f, 0.07568f, 0.633f, 0.727811f, 0.633f, 0.6f };

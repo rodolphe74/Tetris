@@ -1,0 +1,65 @@
+{
+  "buildCommand" : {
+    "command" : "prepareForIndexing",
+    "enableIndexBuildArena" : false,
+    "targets" : null
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "0f84675a16a377f46f1f514e7ec52c9ccfc4fe6f7fefb0443a6abeb429e3d2e9"
+    },
+    {
+      "guid" : "0f84675a16a377f46f1f514e7ec52c9ce3b09df0124453d15d9c91459a8e5f3a"
+    },
+    {
+      "guid" : "0f84675a16a377f46f1f514e7ec52c9c95846cd49f3d489bb53d7fa304124329"
+    }
+  ],
+  "containerPath" : "/Users/rodoc/develop/Tetris/xcode/Tetris.xcodeproj",
+  "continueBuildingAfterErrors" : true,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "arm64",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : false,
+      "platform" : "macosx",
+      "sdk" : "macosx14.5",
+      "sdkVariant" : "macos",
+      "supportedArchitectures" : [
+        "arm64e",
+        "arm64",
+        "x86_64"
+      ],
+      "targetArchitecture" : "arm64"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "",
+      "buildProductsPath" : "",
+      "derivedDataPath" : "/Users/rodoc/Library/Developer/Xcode/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/rodoc/Library/Developer/Xcode/DerivedData/Tetris-bzpielejsuybkfdatabgdnouppdt/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/rodoc/Library/Developer/Xcode/DerivedData/Tetris-bzpielejsuybkfdatabgdnouppdt/Index.noindex/PrecompiledHeaders",
+      "pchPath" : ""
+    },
+    "configurationName" : "Debug",
+    "overrides" : {
+      "synthesized" : {
+        "table" : {
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "NO",
+          "ONLY_ACTIVE_ARCH" : "YES"
+        }
+      }
+    }
+  },
+  "qos" : "default",
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : true,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

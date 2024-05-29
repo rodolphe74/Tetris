@@ -5,7 +5,15 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 #include <array>
+
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
+#include <GL/gl.h>
 #include <GL/glu.h>
+#endif
+
 #include <glm/glm.hpp>
 #include "shapes3d.h"
 #include "constants.h"

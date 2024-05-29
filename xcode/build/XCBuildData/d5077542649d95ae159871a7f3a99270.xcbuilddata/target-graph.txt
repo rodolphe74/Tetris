@@ -1,0 +1,7 @@
+Target dependency graph (3 targets)
+Target 'ALL_BUILD' in project 'Tetris'
+➜ Explicit dependency on target 'tetris' in project 'Tetris'
+➜ Explicit dependency on target 'ZERO_CHECK' in project 'Tetris'
+Target 'tetris' in project 'Tetris'
+➜ Explicit dependency on target 'ZERO_CHECK' in project 'Tetris'
+Target 'ZERO_CHECK' in project 'Tetris' (no dependencies)
