@@ -1,6 +1,12 @@
 #pragma once
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#if defined(__APPLE__)
+#include <CoreFoundation/CoreFoundation.h>
+#include <iostream>
+#endif
+
+
 class resources
 {
   private:
@@ -31,7 +37,6 @@ class resources
   public:
     resources();
     void init();
-    void initApple();
     static resources* instance;
     static resources* getInstance()
     {
@@ -74,4 +79,9 @@ class resources
     static sf::Texture* getTextureFog();
 
     static sf::Font* getFont();
+
+#if __APPLE__
+    void initApple();
+    void getResourcePath(const CFStringRef resourceName, char* resourcePath)
+#endif
 };

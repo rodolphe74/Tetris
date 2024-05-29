@@ -91,7 +91,6 @@ Menu::render()
 int
 Menu::checkKeyboard()
 {
-
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && m_boolkeyReleased) {
         m_iselectedItem =
           (int)(m_iselectedItem >= m_vecItems.size() - 1 ? m_vecItems.size() - 1

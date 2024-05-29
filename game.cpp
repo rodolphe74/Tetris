@@ -194,7 +194,6 @@ void game::initApple()
     }
 	CFRelease(cstrrefFont);
 
-
 	CFStringRef cstrrefTetris99main = CFStringCreateWithCString(NULL, "tetris99main.ogg", kCFStringEncodingUTF8);
 	getResourcePath(cstrrefTetris99main, path);
 	std::cout << "***path***:" << path << std::endl;

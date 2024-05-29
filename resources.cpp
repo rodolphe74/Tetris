@@ -34,10 +34,99 @@ resources::init()
     m_fogTexture.loadFromFile("resources/warp.png");
 }
 
+#ifdef __APPLE__
 void
 resources::initApple()
 {
+    char path[1024];
+    CFStringRef cstrrefFont = CFStringCreateWithCString(
+      NULL, "Brick3DRegular-nRJR4.ttf", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefFont, path);
+    gameFont.loadFromFile(path);
+    CFRelease(cstrrefFont);
+
+    CFStringRef cstrrefTetris99main = CFStringCreateWithCString(
+      NULL, "tetris99main.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefTetris99main, path);
+    std::cout << "***path***:" << path << std::endl;
+    soundBufferMainOne.loadFromFile(path);
+    CFRelease(cstrrefTetris99main);
+
+    CFStringRef cstrrefTetris99main2 = CFStringCreateWithCString(
+      NULL, "tetris99main2.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefTetris99main2, path);
+    std::cout << "***path***:" << path << std::endl;
+    soundBufferMainTwo.loadFromFile(path);
+    CFRelease(cstrrefTetris99main2);
+
+    CFStringRef cstrrefTDrift =
+      CFStringCreateWithCString(NULL, "TDrift.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefTDrift, path);
+    std::cout << "***path***:" << path << std::endl;
+    soundBufferMainThree.loadFromFile(path);
+    CFRelease(cstrrefTDrift);
+
+    CFStringRef cstrrefOne =
+      CFStringCreateWithCString(NULL, "one.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefOne, path);
+    std::cout << "***path***:" << path << std::endl;
+    soundBufferOne.loadFromFile(path);
+    soundOne.setBuffer(soundBufferOne);
+    CFRelease(cstrrefOne);
+
+    CFStringRef cstrrefTwo =
+      CFStringCreateWithCString(NULL, "two.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefTwo, path);
+    std::cout << "***path***:" << path << std::endl;
+    soundBufferTwo.loadFromFile(path);
+    soundTwo.setBuffer(soundBufferOne);
+    CFRelease(cstrrefTwo);
+
+    CFStringRef cstrrefThree =
+      CFStringCreateWithCString(NULL, "three.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefThree, path);
+    std::cout << "***path***:" << path << std::endl;
+    soundBufferThree.loadFromFile(path);
+    soundThree.setBuffer(soundBufferThree);
+    CFRelease(cstrrefThree);
+
+    CFStringRef cstrrefReady =
+      CFStringCreateWithCString(NULL, "ready.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefReady, path);
+    std::cout << "***path***:" << path << std::endl;
+    soundBufferReady.loadFromFile(path);
+    soundReady.setBuffer(soundBufferReady);
+    CFRelease(cstrrefReady);
+
+    CFStringRef cstrrefGo =
+      CFStringCreateWithCString(NULL, "go.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefGo, path);
+    std::cout << "***path***:" << path << std::endl;
+    soundBufferGo.loadFromFile(path);
+    soundGo.setBuffer(soundBufferGo);
+    CFRelease(cstrrefGo);
 }
+
+
+void
+getResourcePath(const CFStringRef resourceName, char *resourcePath)
+{
+    CFURLRef appUrlRef;
+    appUrlRef = CFBundleCopyResourceURL(
+      CFBundleGetMainBundle(), resourceName, NULL, NULL);
+    CFStringRef filePathRef = CFURLCopyPath(appUrlRef);
+    const char* filePath =
+      CFStringGetCStringPtr(filePathRef, kCFStringEncodingUTF8);
+
+    std::cout << "filePath:" << filePath << std::endl;
+    strcpy(resourcePath, filePath);
+
+    CFRelease(filePathRef);
+    CFRelease(appUrlRef);
+}
+#endif // __APPLE__
+
+
 
 sf::SoundBuffer*
 resources::getSoundBufferMainOne()
