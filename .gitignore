@@ -16,3 +16,5 @@ _deps
 /x64
 /Debug/tetris.pdb
 /xcode
+.DS_Store
+/.cache

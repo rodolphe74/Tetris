@@ -82,6 +82,6 @@ class resources
 
 #if __APPLE__
     void initApple();
-    void getResourcePath(const CFStringRef resourceName, char* resourcePath)
+    void getResourcePath(const CFStringRef resourceName, char* resourcePath);
 #endif
 };
