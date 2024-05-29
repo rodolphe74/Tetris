@@ -1,11 +1,10 @@
 #include "game.h"
-#include <CoreFoundation/CoreFoundation.h>
 
 void
 game::playThemeOne()
 {
     AudioStream audioStream;
-    audioStream.load(soundBufferMainOne);
+    audioStream.load(*resources::getSoundBufferMainOne());
     audioStream.play();
     audioStream.isPlaying = true;
     currentPlayingTheme = 1;
@@ -22,7 +21,7 @@ void
 game::playThemeTwo()
 {
     AudioStream audioStream;
-    audioStream.load(soundBufferMainTwo);
+    audioStream.load(*resources::getSoundBufferMainTwo());
     audioStream.play();
     audioStream.isPlaying = true;
     currentPlayingTheme = 2;
@@ -39,7 +38,7 @@ void
 game::playThemeThree()
 {
     AudioStream audioStream;
-    audioStream.load(soundBufferMainThree);
+    audioStream.load(*resources::getSoundBufferMainThree());
     audioStream.play();
     currentPlayingTheme = 3;
     audioStream.isPlaying = true;
@@ -63,23 +62,23 @@ void
 game::gameIntro()
 {
     counter = 4;
-    soundReady.play();
+    resources::getInstance()->getSoundReady()->play();
     sf::sleep(sf::milliseconds(800));
 
     counter = 3;
-    soundThree.play();
+    resources::getInstance()->getSoundThree()->play();
     sf::sleep(sf::milliseconds(800));
 
     counter = 2;
-    soundTwo.play();
+    resources::getInstance()->getSoundTwo()->play();
     sf::sleep(sf::milliseconds(800));
 
     counter = 1;
-    soundOne.play();
+    resources::getInstance()->getSoundOne()->play();
     sf::sleep(sf::milliseconds(800));
 
     counter = 0;
-    soundGo.play();
+    resources::getInstance()->getSoundGo()->play();
     sf::sleep(sf::milliseconds(800));
 
     counter = -1;
@@ -89,7 +88,7 @@ void
 game::pauseGame()
 {
     sf::Text t;
-    t.setFont(gameFont);
+    t.setFont(*gameFontPtr);
     t.setCharacterSize(48);
     t.setString("Paused game!");
     t.rotate(-30);
@@ -118,24 +117,7 @@ game::unpauseGame()
 void
 game::init()
 {
-    if (!gameFont.loadFromFile("resources/Brick3DRegular-nRJR4.ttf")) {
-        perror("can't load font");
-    }
-
-    soundBufferMainOne.loadFromFile("resources/tetris99main.ogg");
-    soundBufferMainTwo.loadFromFile("resources/tetris99main2.ogg");
-    soundBufferMainThree.loadFromFile("resources/TDrift.ogg");
-
-    soundBufferOne.loadFromFile("resources/one.ogg");
-    soundOne.setBuffer(soundBufferOne);
-    soundBufferTwo.loadFromFile("resources/two.ogg");
-    soundTwo.setBuffer(soundBufferTwo);
-    soundBufferThree.loadFromFile("resources/three.ogg");
-    soundThree.setBuffer(soundBufferThree);
-    soundBufferGo.loadFromFile("resources/ready.ogg");
-    soundReady.setBuffer(soundBufferGo);
-    soundBufferReady.loadFromFile("resources/go.ogg");
-    soundGo.setBuffer(soundBufferReady);
+    gameFontPtr = resources::getFont();
 
     contextSettings.antialiasingLevel = 8;
     contextSettings.depthBits = 24;
@@ -391,7 +373,7 @@ game::newGameIntroRender(int& countFrames)
     }
 
     sf::Text t;
-    t.setFont(gameFont);
+    t.setFont(*gameFontPtr);
     t.setCharacterSize(48);
     if (counter == 4) {
         t.setString("Ready");

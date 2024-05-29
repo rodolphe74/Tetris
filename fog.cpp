@@ -1,5 +1,6 @@
 #include "fog.h"
 #include "constants.h"
+#include "resources.h"
 
 #define FOG_TIME 8.0f
 
@@ -10,28 +11,27 @@ Fog::Fog()
     m_fogSprite = NULL;
     m_iWidth = 1;
 
-    if (!m_fogTexture.loadFromFile("resources/warp.png")) {
-        perror("can't load texture");
-    }
+    m_fogTexturePtr = resources::getTextureFog();
 
-    m_fogSpriteOne.setTexture(m_fogTexture);
-    m_frxOne = PIXEL_SQUARE_SIZE / (float)m_fogTexture.getSize().x;
-    m_fryOne = PIXEL_FOG_SIZE / (float)m_fogTexture.getSize().y;
+    m_fogSpriteOne.setTexture(*m_fogTexturePtr);
+    m_frxOne = PIXEL_SQUARE_SIZE / (float)(*m_fogTexturePtr).getSize().x;
+    m_fryOne = PIXEL_FOG_SIZE / (float)(*m_fogTexturePtr).getSize().y;
     m_fogSpriteOne.setScale(m_frxOne, m_fryOne);
 
-    m_fogSpriteTwo.setTexture(m_fogTexture);
-    m_frxTwo = (PIXEL_SQUARE_SIZE * 2) / (float)m_fogTexture.getSize().x;
-    m_fryTwo = PIXEL_FOG_SIZE / (float)m_fogTexture.getSize().y;
+    m_fogSpriteTwo.setTexture(*m_fogTexturePtr);
+    m_frxTwo = (PIXEL_SQUARE_SIZE * 2) / (float)(*m_fogTexturePtr).getSize().x;
+    m_fryTwo = PIXEL_FOG_SIZE / (float)(*m_fogTexturePtr).getSize().y;
     m_fogSpriteTwo.setScale(m_frxTwo, m_fryTwo);
 
-    m_fogSpriteThree.setTexture(m_fogTexture);
-    m_frxThree = (PIXEL_SQUARE_SIZE * 3) / (float)m_fogTexture.getSize().x;
-    m_fryThree = PIXEL_FOG_SIZE / (float)m_fogTexture.getSize().y;
+    m_fogSpriteThree.setTexture(*m_fogTexturePtr);
+    m_frxThree =
+      (PIXEL_SQUARE_SIZE * 3) / (float)(*m_fogTexturePtr).getSize().x;
+    m_fryThree = PIXEL_FOG_SIZE / (float)(*m_fogTexturePtr).getSize().y;
     m_fogSpriteThree.setScale(m_frxThree, m_fryThree);
 
-    m_fogSpriteFour.setTexture(m_fogTexture);
-    m_frxFour = (PIXEL_SQUARE_SIZE * 4) / (float)m_fogTexture.getSize().x;
-    m_fryFour = PIXEL_FOG_SIZE / (float)m_fogTexture.getSize().y;
+    m_fogSpriteFour.setTexture(*m_fogTexturePtr);
+    m_frxFour = (PIXEL_SQUARE_SIZE * 4) / (float)(*m_fogTexturePtr).getSize().x;
+    m_fryFour = PIXEL_FOG_SIZE / (float)(*m_fogTexturePtr).getSize().y;
     m_fogSpriteFour.setScale(m_frxFour, m_fryFour);
 }
 

@@ -6,6 +6,7 @@
 #include "particles.h"
 #include "ia.h"
 #include "fire.h"
+#include "resources.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <queue>
@@ -37,20 +38,6 @@ class game
   private:
     menuEnum menuStep = MENU;
     gameModeEnum gameMode = WAIT_SELECTION;
-    sf::SoundBuffer soundBufferMainOne;
-    sf::SoundBuffer soundBufferMainTwo;
-    sf::SoundBuffer soundBufferMainThree;
-
-    sf::SoundBuffer soundBufferOne;
-    sf::SoundBuffer soundBufferTwo;
-    sf::SoundBuffer soundBufferThree;
-    sf::SoundBuffer soundBufferGo;
-    sf::SoundBuffer soundBufferReady;
-    sf::Sound soundOne;
-    sf::Sound soundTwo;
-    sf::Sound soundThree;
-    sf::Sound soundReady;
-    sf::Sound soundGo;
 
     sf::Clock newGameAnimWait;
     int currentPlayingTheme = -1;
@@ -66,7 +53,8 @@ class game
     Particles particles;
     std::queue<ParticlePos> particlesQueue;
     Menu* menu;
-    sf::Font gameFont;
+    //sf::Font gameFont;
+    sf::Font *gameFontPtr;
     int counter = -1;
     int model;
     int material;

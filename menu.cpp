@@ -5,7 +5,7 @@ void
 Menu::computeHeight()
 {
     sf::String title = TITLE;
-    sf::Text t(title, m_menuFont, 30);
+    sf::Text t(title, *m_menuFontPtr, 30);
     // m_fheight = t.getLocalBounds().height + 2 * ITEM_HEIGHT_INCREMENT;
     // m_fwidth = t.getLocalBounds().width + 2 * GAP;
     m_fwidth = 0;
@@ -13,7 +13,8 @@ Menu::computeHeight()
     int count = 0;
     for (auto it = m_vecItems.begin(); it != m_vecItems.end(); it++) {
         sf::String s = it->text;
-        sf::Text i(s, m_menuFont, 30);
+        //sf::Text i(s, m_menuFont, 30);
+        sf::Text i(s, *m_menuFontPtr, 30);
 
         m_fheight += i.getLocalBounds().height;
         if (count < m_vecItems.size() - 1)
@@ -36,7 +37,7 @@ void
 Menu::render()
 {
     sf::String title = TITLE;
-    sf::Text t(title, m_menuFont, FONT_SIZE);
+    sf::Text t(title, *m_menuFontPtr, FONT_SIZE);
 
     sf::RectangleShape box(
       sf::Vector2f(m_fwidth + 2 * GAP_W, m_fheight + 2 * GAP_H));
@@ -57,7 +58,7 @@ Menu::render()
     int count = 0;
     for (auto it = m_vecItems.begin(); it != m_vecItems.end(); it++) {
         sf::String s = it->text;
-        sf::Text i(s, m_menuFont, FONT_SIZE);
+        sf::Text i(s, *m_menuFontPtr, FONT_SIZE);
         i.setPosition(WINDOW_W / 2 - box.getSize().x / 2 + GAP_W,
                       WINDOW_H / 2 - m_fheight / 2 + y -
                         m_vecItems.size() * FONT_LEADING);
@@ -96,7 +97,7 @@ Menu::checkKeyboard()
           (int)(m_iselectedItem >= m_vecItems.size() - 1 ? m_vecItems.size() - 1
                                                          : m_iselectedItem + 1);
         if (m_boolcanSound) {
-            m_soundMove.play();
+            resources::getSoundMove()->play();
             m_boolcanSound = false;
         }
         m_boolkeyReleased = false;
@@ -105,7 +106,7 @@ Menu::checkKeyboard()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && m_boolkeyReleased) {
         m_iselectedItem = (m_iselectedItem <= 0 ? 0 : m_iselectedItem - 1);
         if (m_boolcanSound) {
-            m_soundMove.play();
+            resources::getSoundMove()->play();
             m_boolcanSound = false;
         }
         m_boolkeyReleased = false;
@@ -113,7 +114,7 @@ Menu::checkKeyboard()
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter) && m_boolkeyReleased) {
         if (m_boolcanSound) {
-            m_soundWarp.play();
+            resources::getSoundWarp()->play();
             m_boolcanSound = false;
         }
         m_boolkeyReleased = false;

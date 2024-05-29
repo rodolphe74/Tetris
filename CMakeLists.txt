@@ -29,20 +29,22 @@ set(sharedRes
 	resources/go.ogg
 )
 
-# add_executable(tetris tetris.cpp game.cpp board.cpp animatedBackground.cpp particles.cpp fog.cpp audioStream.cpp menu.cpp ia.cpp gameStatesQueue.cpp fire.cpp)
 
-add_executable(tetris MACOSX_BUNDLE tetris.cpp game.cpp board.cpp animatedBackground.cpp particles.cpp fog.cpp audioStream.cpp menu.cpp ia.cpp gameStatesQueue.cpp fire.cpp ${sharedRes})
+IF(WIN32)
+	add_executable(tetris tetris.cpp game.cpp board.cpp animatedBackground.cpp particles.cpp fog.cpp audioStream.cpp menu.cpp ia.cpp gameStatesQueue.cpp fire.cpp)
+	target_link_libraries(tetris PRIVATE sfml-system sfml-network sfml-graphics sfml-window sfml-audio ${OPENGL_LIBRARY} glm::glm-header-only FLAC::FLAC OpenAL::OpenAL Vorbis::vorbis Vorbis::vorbisfile Vorbis::vorbisenc)
+ENDIF()
 
-set_source_files_properties(${sharedRes} PROPERTIES
-	MACOSX_PACKAGE_LOCATION Resources
-)
 
-target_link_libraries(tetris PRIVATE sfml-system sfml-network sfml-graphics sfml-window sfml-audio ${OPENGL_LIBRARY} glm::glm-header-only FLAC::FLAC OpenAL::OpenAL Vorbis::vorbis Vorbis::vorbisfile Vorbis::vorbisenc ${CoreFoundation_Library})
 
-# IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-# 	Message("APPLE!!!!!!!!!!!!!!")
-# 	set_target_properties(tetris PROPERTIES 
-# 		MACOSX_BUNDLE TRUE
-# 		RESOURCE ${RES}
-# )
-# ENDIF()
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	Message("APPLE")
+	add_executable(tetris MACOSX_BUNDLE tetris.cpp game.cpp board.cpp animatedBackground.cpp particles.cpp fog.cpp audioStream.cpp menu.cpp ia.cpp gameStatesQueue.cpp fire.cpp ${sharedRes})
+
+	set_source_files_properties(${sharedRes} PROPERTIES
+		MACOSX_PACKAGE_LOCATION Resources
+	)
+
+	target_link_libraries(tetris PRIVATE sfml-system sfml-network sfml-graphics sfml-window sfml-audio ${OPENGL_LIBRARY} glm::glm-header-only FLAC::FLAC OpenAL::OpenAL Vorbis::vorbis Vorbis::vorbisfile Vorbis::vorbisenc ${CoreFoundation_Library})
+ENDIF()

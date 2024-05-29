@@ -17,14 +17,13 @@ Particles::Particles()
     }
     maxIndex = 0;
 
-    if (!m_asterTexture.loadFromFile("resources/asterw.png")) {
-        perror("can't load texture");
-    }
-    m_asterTexture.setSmooth(true);
-    m_asterSprite.setTexture(m_asterTexture);
-    float rx = PIXEL_ASTER_SIZE / (float)m_asterTexture.getSize().x;
-    float ry = PIXEL_ASTER_SIZE / (float)m_asterTexture.getSize().y;
-    m_asterSprite.setScale(rx, ry);
+    m_asterTexturePtr = resources::getTextureAster();
+    m_asterSpritePtr = resources::getSpriteAster();
+    float rx = PIXEL_ASTER_SIZE / (float)m_asterTexturePtr->getSize().x;
+    float ry = PIXEL_ASTER_SIZE / (float)m_asterTexturePtr->getSize().y;
+    m_asterSpritePtr->setScale(rx, ry);
+
+    int a = 0;
 }
 
 Particles::~Particles()
@@ -42,7 +41,7 @@ Particles::addParticles(float x, float y, int count, int colorScheme)
     if (maxIndex + count > MAX_PARTICLES_COUNT) {
         return;
     }
-    
+
     sf::Color sparkColors[3];
     if (colorScheme == 1) {
         sparkColors[0] = sf::Color(255, 0, 0);
@@ -194,14 +193,15 @@ Particles::renderParticles(sf::RenderWindow& window)
                            sf::Color(255, 255, 255) };
     for (int i = 0; i < maxIndex; i++) {
         sf::CircleShape shape(2);
-        m_asterSprite.setColor(
+        m_asterSpritePtr->setColor(
           sf::Color(m_parcolors[i].r,
                     m_parcolors[i].g,
                     m_parcolors[i].b,
                     (int)(m_pfarlife[i] * (228.0f / 50.0f))));
 
-        m_asterSprite.setPosition(m_pvglarpos[i].x, m_pvglarpos[i].y);
-        m_asterSprite.setRotation(m_pfarrotation[i]);
-        window.draw(m_asterSprite);
+        m_asterSpritePtr->setPosition(m_pvglarpos[i].x, m_pvglarpos[i].y);
+        m_asterSpritePtr->setRotation(m_pfarrotation[i]);
+
+        window.draw(*m_asterSpritePtr);
     }
 }

@@ -11,7 +11,7 @@ class Fog
     sf::Glsl::Vec3 m_pvglpos;
     float m_pflife;
     int m_iWidth;
-    sf::Texture m_fogTexture;
+    sf::Texture *m_fogTexturePtr;
     sf::Sprite *m_fogSprite = NULL;
 
     float m_frxOne, m_fryOne;

@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Glsl.hpp>
+#include "resources.h"
 
 #define MAX_PARTICLES_COUNT 1000
 
@@ -17,8 +18,8 @@ class Particles
     float* m_pfarlife;
     float* m_pfarrotation;
     sf::Color* m_parcolors;
-    sf::Texture m_asterTexture;
-    sf::Sprite m_asterSprite;
+    sf::Texture *m_asterTexturePtr;
+    sf::Sprite *m_asterSpritePtr;
 
   public:
     Particles();
