@@ -312,7 +312,7 @@ Board::render(float shiftLeft,
 
             // Then real gameOver
             m_equeueGameStates.pushFront(gameOver);
-            m_soundGameOver.play();
+            resources::getSoundGameOver()->play();
         }
     }
 
@@ -345,7 +345,7 @@ Board::render(float shiftLeft,
 
         m_currentLineExtension += m_currentLineExtensionStep;
         if (!m_boolonceLineSound) {
-            m_soundLine.play();
+            resources::getSoundLine()->play();
             m_boolonceLineSound = true;
         }
 
@@ -394,13 +394,7 @@ Board::render(float shiftLeft,
         }
         m_strscore = std::to_string(m_iscore);
 
-        // printf(">>>>>%d %d %d = %f\n",
-        //        m_ilevel,
-        //        m_icountLines,
-        //        m_icountLinesPerLevel,
-        //        m_ftimeMultiplier);
-
-        m_soundExplode.play();
+        resources::getSoundExplode()->play();
         m_ftimeMultiplier = getCurrentLevelMultiplier();
         m_boolonceLineSound = false;
         // in case of AUTOPLAY authorize computer to play next shape after
@@ -974,7 +968,7 @@ Board::right()
         return;
 
     if (m_boolOnceMoveSound) {
-        m_soundMove.play();
+        resources::getSoundMove()->play();
         m_boolOnceMoveSound = false;
     }
 
@@ -997,7 +991,7 @@ Board::left()
         return;
 
     if (m_boolOnceMoveSound) {
-        m_soundMove.play();
+        resources::getSoundMove()->play();
         m_boolOnceMoveSound = false;
     }
     m_currentShapeCol--;
@@ -1028,7 +1022,7 @@ Board::warp()
            m_currentShapeRow < GRID_H - m_currentBottomShiftShape - 1)
         m_currentShapeRow++;
 
-    m_soundWarp.play();
+    resources::getSoundWarp()->play();
 
     // Clean current shape before setting it
     clearCurrentShape();
@@ -1070,7 +1064,7 @@ Board::warp()
 void
 Board::rotate()
 {
-    m_soundRotate.play();
+    resources::getSoundRotate()->play();
 
     const int* rotatedShape =
       tt::gShapesArray[m_currentShape][(m_currentShapeRotation + 1) % 4];
@@ -1286,7 +1280,8 @@ Board::looser(bool isHumanLoose)
         youLoose.setString("Computer loose !");
 
     youLoose.setCharacterSize(30);
-    youLoose.setFont(m_gameFont);
+    //youLoose.setFont(m_gameFont);
+    youLoose.setFont(*m_gameFontPtr);
     sf::FloatRect fr = youLoose.getGlobalBounds();
     sf::FloatRect lr = youLoose.getLocalBounds();
 
@@ -1308,7 +1303,7 @@ Board::looser(bool isHumanLoose)
 void
 Board::playIntro()
 {
-    m_soundIntro.play();
+    resources::getSoundIntro()->play();
 }
 
 void
@@ -1372,7 +1367,7 @@ Board::getNextLevelMultiplier()
         mult = 0.04f;
     }
 
-    m_soundHurry.play();
+    resources::getSoundHurry()->play();
     return mult;
 }
 

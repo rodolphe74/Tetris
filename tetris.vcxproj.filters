@@ -1,50 +1,49 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\tetris.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\tetris.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\game.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\board.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\resources.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\animatedBackground.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\board.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\particles.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\animatedBackground.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\fog.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\particles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\audioStream.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\fog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\menu.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\audioStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\ia.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\gameStatesQueue.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\ia.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\rodoc\HOME\developpement\Tetris\fire.cpp">
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\gameStatesQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="resources.cpp" />
+    <ClCompile Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\fire.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\rodoc\HOME\developpement\Tetris\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\rodoc\HOME\developpement\visual\Tetris\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{E470C99D-F656-3F98-B6D0-5AABC1912E1D}</UniqueIdentifier>
+      <UniqueIdentifier>{BCA19BFA-47D4-3205-A6A2-1707B6608360}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="resources.h" />
   </ItemGroup>
 </Project>

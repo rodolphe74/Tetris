@@ -25,6 +25,19 @@ class resources
     sf::Sound m_soundReady;
     sf::Sound m_soundGo;
 
+    sf::SoundBuffer m_soundBufferIntro;
+    sf::Sound m_soundIntro;
+    sf::SoundBuffer m_soundBufferExplode;
+    sf::Sound m_soundExplode;
+    sf::SoundBuffer m_soundBufferRotate;
+    sf::Sound m_soundRotate;
+    sf::SoundBuffer m_soundBufferLine;
+    sf::Sound m_soundLine;
+    sf::SoundBuffer m_soundBufferHurry;
+    sf::Sound m_soundHurry;
+    sf::SoundBuffer m_soundBufferGameOver;
+    sf::Sound m_soundGameOver;
+
     sf::SoundBuffer m_soundBufferMove;
     sf::Sound m_soundMove;
     sf::SoundBuffer m_soundBufferWarp;
@@ -33,6 +46,9 @@ class resources
     sf::Texture m_asterTexture;
 
     sf::Texture m_fogTexture;
+    
+    sf::Texture m_squareTexture;
+    sf::Texture m_borderTexture;
 
   public:
     resources();
@@ -53,14 +69,21 @@ class resources
         }
     }
 
-    static sf::SoundBuffer *getSoundBufferMainOne();
-    static sf::SoundBuffer *getSoundBufferMainTwo();
+    static sf::SoundBuffer* getSoundBufferMainOne();
+    static sf::SoundBuffer* getSoundBufferMainTwo();
     static sf::SoundBuffer* getSoundBufferMainThree();
     static sf::SoundBuffer* getSoundBufferOne();
     static sf::SoundBuffer* getSoundBufferTwo();
     static sf::SoundBuffer* getSoundBufferThree();
     static sf::SoundBuffer* getSoundBufferGo();
     static sf::SoundBuffer* getSoundBufferReady();
+
+    static sf::Sound* getSoundIntro();
+    static sf::Sound* getSoundExplode();
+    static sf::Sound* getSoundRotate();
+    static sf::Sound* getSoundLine();
+    static sf::Sound* getSoundHurry();
+    static sf::Sound* getSoundGameOver();
 
     static sf::SoundBuffer* getSoundBufferMove();
     static sf::SoundBuffer* getSoundBufferWarp();
@@ -77,6 +100,9 @@ class resources
     static sf::Texture* getTextureAster();
     static sf::Sprite* getSpriteAster();
     static sf::Texture* getTextureFog();
+
+    static sf::Texture* getSquare();
+    static sf::Texture* getBorder();
 
     static sf::Font* getFont();
 

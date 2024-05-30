@@ -22,13 +22,16 @@ class Board
 
     // Graphics
     sf::RenderWindow* m_prenderWindow;
-    sf::Texture m_squareTexture;
+    //sf::Texture m_squareTexture;
+    sf::Texture *m_squareTexturePtr;
     sf::Sprite m_squareSprite;
     sf::Sprite m_smallSquareSprite;
     sf::Sprite m_mediumSquareSprite;
-    sf::Texture m_borderTexture;
+    //sf::Texture m_borderTexture;
+    sf::Texture *m_borderTexturePtr;
     sf::Sprite m_borderSprite;
-    sf::Font m_gameFont;
+    //sf::Font m_gameFont;
+    sf::Font *m_gameFontPtr;
 
     // Timers
     sf::Clock m_waitClock;
@@ -40,24 +43,7 @@ class Board
     bool m_bisComputerMoving = false;
     bool m_moveComputerThreadAllocated = false;
 
-    // Sounds
-    sf::SoundBuffer m_soundBufferIntro;
-    sf::Sound m_soundIntro;
-    sf::SoundBuffer m_soundBufferExplode;
-    sf::Sound m_soundExplode;
-    sf::SoundBuffer m_soundBufferRotate;
-    sf::Sound m_soundRotate;
-    sf::SoundBuffer m_soundBufferLine;
-    sf::Sound m_soundLine;
-    sf::SoundBuffer m_soundBufferMove;
-    sf::Sound m_soundMove;
-    sf::SoundBuffer m_soundBufferWarp;
-    sf::Sound m_soundWarp;
-    sf::SoundBuffer m_soundBufferHurry;
-    sf::Sound m_soundHurry;
-    sf::SoundBuffer m_soundBufferGameOver;
-    sf::Sound m_soundGameOver;
-
+    
     Particles m_particles;
     Fog m_fog;
     int m_currentShape = -1;
@@ -127,106 +113,50 @@ class Board
             }
         }
 
-        // load square sprite
-        if (!m_squareTexture.loadFromFile("resources/big_square_clear.png")) {
-            perror("can't load texture");
-        }
-        m_squareTexture.setSmooth(true);
-        m_squareSprite.setTexture(m_squareTexture);
-        float rx = PIXEL_SQUARE_SIZE / (float)m_squareTexture.getSize().x;
-        float ry = PIXEL_SQUARE_SIZE / (float)m_squareTexture.getSize().y;
+        m_squareTexturePtr = resources::getSquare();
+        m_squareTexturePtr->setSmooth(true);
+        m_squareSprite.setTexture(*m_squareTexturePtr);
+        float rx = PIXEL_SQUARE_SIZE / (float)(*m_squareTexturePtr).getSize().x;
+        float ry = PIXEL_SQUARE_SIZE / (float)(*m_squareTexturePtr).getSize().y;
         m_squareSprite.setScale(rx, ry);
 
-        m_smallSquareSprite.setTexture(m_squareTexture);
+
+        //m_smallSquareSprite.setTexture(m_squareTexture);
+        m_smallSquareSprite.setTexture(*m_squareTexturePtr);
         rx = (PIXEL_SQUARE_SIZE / SMALL_SHAPE_REDUCTION_FACTOR) /
-             (float)m_squareTexture.getSize().x;
+             (float)(*m_squareTexturePtr).getSize().x;
         ry = (PIXEL_SQUARE_SIZE / SMALL_SHAPE_REDUCTION_FACTOR) /
-             (float)m_squareTexture.getSize().y;
+             (float)(*m_squareTexturePtr).getSize().y;
         m_smallSquareSprite.setScale(rx, ry);
 
-        m_mediumSquareSprite.setTexture(m_squareTexture);
+        m_mediumSquareSprite.setTexture(*m_squareTexturePtr);
         rx = (PIXEL_SQUARE_SIZE / MEDIUM_SHAPE_REDUCTION_FACTOR) /
-             (float)m_squareTexture.getSize().x;
+             (float)(*m_squareTexturePtr).getSize().x;
         ry = (PIXEL_SQUARE_SIZE / MEDIUM_SHAPE_REDUCTION_FACTOR) /
-             (float)m_squareTexture.getSize().y;
+             (float)(*m_squareTexturePtr).getSize().y;
         m_mediumSquareSprite.setScale(rx, ry);
 
-        // load border sprite
-        if (!m_borderTexture.loadFromFile("resources/borderb.png")) {
-            perror("can't load texture");
-        }
-        m_borderTexture.setSmooth(true);
-        m_borderSprite.setTexture(m_borderTexture);
-        rx = (PIXEL_SQUARE_SIZE * GRID_W) / (float)m_borderTexture.getSize().x;
+        m_borderTexturePtr = resources::getBorder();
+        (*m_borderTexturePtr).setSmooth(true);
+        m_borderSprite.setTexture(*m_borderTexturePtr);
+        rx =
+          (PIXEL_SQUARE_SIZE * GRID_W) / (float)(*m_borderTexturePtr).getSize().x;
         rx *= BORDER_W_MULT;
-        ry = (PIXEL_SQUARE_SIZE * GRID_H) / (float)m_borderTexture.getSize().y;
+        ry =
+          (PIXEL_SQUARE_SIZE * GRID_H) / (float)(*m_borderTexturePtr).getSize().y;
         ry *= BORDER_H_MULT;
         m_borderSprite.setScale(rx, ry);
         printf("%f\n", m_borderSprite.getGlobalBounds().width);
         printf("%f\n", m_borderSprite.getGlobalBounds().height);
 
-        // load font
-        if (!m_gameFont.loadFromFile("resources/Brick3DRegular-nRJR4.ttf")) {
-            perror("can't load font");
-        }
-
-        // load sounds
-        if (!m_soundBufferExplode.loadFromFile("resources/explode.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundExplode.setBuffer(m_soundBufferExplode);
-
-        if (!m_soundBufferRotate.loadFromFile("resources/rotate.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundRotate.setBuffer(m_soundBufferRotate);
-
-        if (!m_soundBufferMove.loadFromFile("resources/move.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundMove.setBuffer(m_soundBufferMove);
-
-        if (!m_soundBufferLine.loadFromFile("resources/line.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundLine.setBuffer(m_soundBufferLine);
-
-        if (!m_soundBufferWarp.loadFromFile("resources/warp.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundWarp.setBuffer(m_soundBufferWarp);
-
-        if (!m_soundBufferIntro.loadFromFile("resources/intro.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundIntro.setBuffer(m_soundBufferIntro);
-
-        if (!m_soundBufferWarp.loadFromFile("resources/warp.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundWarp.setBuffer(m_soundBufferWarp);
-
-        if (!m_soundBufferIntro.loadFromFile("resources/intro.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundIntro.setBuffer(m_soundBufferIntro);
-
-        if (!m_soundBufferHurry.loadFromFile("resources/hurry.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundHurry.setBuffer(m_soundBufferHurry);
-
-        if (!m_soundBufferGameOver.loadFromFile("resources/gameover.ogg")) {
-            perror("can't load sound");
-        }
-        m_soundGameOver.setBuffer(m_soundBufferGameOver);
+        m_gameFontPtr = resources::getFont();
 
         // init strings and text
-        m_textscore.setFont(m_gameFont);
+        m_textscore.setFont(*m_gameFontPtr);
         m_textscore.setCharacterSize(SCORE_FONT_SIZE);
-        m_textline.setFont(m_gameFont);
+        m_textline.setFont(*m_gameFontPtr);
         m_textline.setCharacterSize(LINE_FONT_SIZE);
-        m_textlevel.setFont(m_gameFont);
+        m_textlevel.setFont(*m_gameFontPtr);
         m_textlevel.setCharacterSize(LEVELF_FONT_SIZE);
 
         srand((unsigned int)time(NULL));

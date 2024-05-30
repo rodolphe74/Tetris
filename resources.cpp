@@ -23,6 +23,30 @@ resources::init()
     m_soundBufferReady.loadFromFile("resources/go.ogg");
     m_soundGo.setBuffer(m_soundBufferReady);
 
+    m_soundBufferExplode.loadFromFile("resources/explode.ogg");
+    m_soundExplode.setBuffer(m_soundBufferExplode);
+    m_soundBufferRotate.loadFromFile("resources/rotate.ogg");
+    m_soundRotate.setBuffer(m_soundBufferRotate);
+    m_soundBufferMove.loadFromFile("resources/move.ogg");
+    m_soundMove.setBuffer(m_soundBufferMove);
+    m_soundBufferLine.loadFromFile("resources/line.ogg");
+    m_soundLine.setBuffer(m_soundBufferLine);
+    m_soundBufferWarp.loadFromFile("resources/warp.ogg");
+    m_soundWarp.setBuffer(m_soundBufferWarp);
+    m_soundBufferIntro.loadFromFile("resources/intro.ogg");
+    m_soundIntro.setBuffer(m_soundBufferIntro);
+    m_soundBufferWarp.loadFromFile("resources/warp.ogg");
+    m_soundWarp.setBuffer(m_soundBufferWarp);
+    m_soundBufferIntro.loadFromFile("resources/intro.ogg");
+    m_soundIntro.setBuffer(m_soundBufferIntro);
+    m_soundBufferHurry.loadFromFile("resources/hurry.ogg");
+    m_soundHurry.setBuffer(m_soundBufferHurry);
+    m_soundBufferGameOver.loadFromFile("resources/gameover.ogg");
+    m_soundGameOver.setBuffer(m_soundBufferGameOver);
+
+    m_squareTexture.loadFromFile("resources/big_square_clear.png");
+    m_borderTexture.loadFromFile("resources/borderb.png");
+
     m_soundBufferMove.loadFromFile("resources/move.ogg");
     m_soundMove.setBuffer(m_soundBufferMove);
     m_soundBufferWarp.loadFromFile("resources/warp.ogg");
@@ -134,7 +158,69 @@ resources::initApple()
     getResourcePath(cstrrefWarpFog, path);
     std::cout << "***path***:" << path << std::endl;
     m_fogTexture.loadFromFile(path);
+    CFRelease(cstrrefWarpFog);
     
+    CFStringRef cstrrefExplode =
+      CFStringCreateWithCString(NULL, "explode.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefExplode, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_soundBufferExplode.loadFromFile(path);
+    m_soundExplode.setBuffer(m_soundBufferExplode);
+    CFRelease(cstrrefExplode);
+
+    CFStringRef cstrrefRotate =
+      CFStringCreateWithCString(NULL, "rotate.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefRotate, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_soundBufferRotate.loadFromFile(path);
+    m_soundRotate.setBuffer(m_soundBufferRotate);
+    CFRelease(cstrrefRotate);
+
+    CFStringRef cstrrefLine =
+      CFStringCreateWithCString(NULL, "line.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefLine, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_soundBufferLine.loadFromFile(path);
+    m_soundLine.setBuffer(m_soundBufferLine);
+    CFRelease(cstrrefLine);
+
+    CFStringRef cstrrefIntro =
+      CFStringCreateWithCString(NULL, "intro.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefIntro, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_soundBufferIntro.loadFromFile(path);
+    m_soundIntro.setBuffer(m_soundBufferIntro);
+    CFRelease(cstrrefIntro);
+
+    CFStringRef cstrrefHurry =
+      CFStringCreateWithCString(NULL, "hurry.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefHurry, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_soundBufferHurry.loadFromFile(path);
+    m_soundHurry.setBuffer(m_soundBufferHurry);
+    CFRelease(cstrrefHurry);
+
+    CFStringRef cstrrefGameOver =
+      CFStringCreateWithCString(NULL, "gameover.ogg", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefHurry, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_soundBufferGameOver.loadFromFile(path);
+    m_soundGameOver.setBuffer(m_soundBufferGameOver);
+    CFRelease(cstrrefGameOver);
+
+    CFStringRef cstrrefSquare =
+      CFStringCreateWithCString(NULL, "big_square_clear.png", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefSquare, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_squareTexture.loadFromFile(path);
+    CFRelease(cstrrefSquare);
+
+    CFStringRef cstrrefBorder = CFStringCreateWithCString(
+      NULL, "borderb.png", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefBorder, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_borderTexture.loadFromFile(path);
+    CFRelease(cstrrefBorder);
 }
 
 
@@ -204,6 +290,42 @@ sf::SoundBuffer*
 resources::getSoundBufferReady()
 {
     return &(getInstance()->m_soundBufferReady);
+}
+
+sf::Sound*
+resources::getSoundIntro()
+{
+    return &(getInstance()->m_soundIntro);
+}
+
+sf::Sound*
+resources::getSoundExplode()
+{
+    return &(getInstance()->m_soundExplode);
+}
+
+sf::Sound*
+resources::getSoundRotate()
+{
+    return &(getInstance()->m_soundRotate);
+}
+
+sf::Sound*
+resources::getSoundLine()
+{
+    return &(getInstance()->m_soundLine);
+}
+
+sf::Sound*
+resources::getSoundHurry()
+{
+    return &(getInstance()->m_soundHurry);
+}
+
+sf::Sound*
+resources::getSoundGameOver()
+{
+    return &(getInstance()->m_soundGameOver);
 }
 
 sf::SoundBuffer*
@@ -282,4 +404,16 @@ sf::Texture*
 resources::getTextureFog()
 {
     return &(getInstance()->m_fogTexture);
+}
+
+sf::Texture*
+resources::getSquare()
+{
+    return &(getInstance()->m_squareTexture);
+}
+
+sf::Texture*
+resources::getBorder()
+{
+    return &(getInstance()->m_borderTexture);
 }
