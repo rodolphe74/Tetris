@@ -31,6 +31,15 @@ set(sharedRes
     resources/warp.ogg
     resources/asterw.png
     resources/warp.png
+    resources/explode.ogg
+    resources/rotate.ogg
+    resources/move.ogg
+    resources/line.ogg
+    resources/intro.ogg
+    resources/hurry.ogg
+    resources/gameover.ogg
+    resources/big_square_clear.png
+    resources/borderb.png
 )
 
 
