@@ -28,7 +28,6 @@ set(sharedRes
 	resources/ready.ogg
 	resources/go.ogg
     resources/move.ogg
-    resources/warp.ogg
     resources/asterw.png
     resources/warp.png
     resources/explode.ogg
