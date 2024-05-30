@@ -40,6 +40,7 @@ set(sharedRes
 	resources/gameover.ogg
 	resources/big_square_clear.png
 	resources/borderb.png
+    resources/tetris.icns
 )
 
 
@@ -54,6 +55,8 @@ ENDIF()
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	Message("APPLE")
+    set(MACOSX_BUNDLE_ICON_FILE tetris.icns)
+    set(TETRIS_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/tetris.icns)
 	add_executable(tetris MACOSX_BUNDLE tetris.cpp game.cpp resources.cpp board.cpp animatedBackground.cpp particles.cpp fog.cpp audioStream.cpp menu.cpp ia.cpp gameStatesQueue.cpp fire.cpp ${sharedRes})
 
 	set_source_files_properties(${sharedRes} PROPERTIES

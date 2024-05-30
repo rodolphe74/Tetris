@@ -52,6 +52,13 @@ class resources
 
   public:
     resources();
+    static void free()
+    {
+        if (instance != nullptr) {
+            std::cout << "freeing resources" << std::endl;
+            delete instance;
+        }
+    }
     void init();
     static resources* instance;
     static resources* getInstance()

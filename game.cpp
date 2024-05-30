@@ -193,6 +193,7 @@ game::freeAndExit()
     delete humanBoard;
     delete computerBoard;
     delete window;
+    resources::free();
 }
 
 void
