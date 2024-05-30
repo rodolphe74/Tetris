@@ -97,7 +97,7 @@ resources::initApple()
     getResourcePath(cstrrefTwo, path);
     std::cout << "***path***:" << path << std::endl;
     m_soundBufferTwo.loadFromFile(path);
-    m_soundTwo.setBuffer(m_soundBufferOne);
+    m_soundTwo.setBuffer(m_soundBufferTwo);
     CFRelease(cstrrefTwo);
 
     CFStringRef cstrrefThree =
@@ -208,6 +208,13 @@ resources::initApple()
     std::cout << "***path***:" << path << std::endl;
     m_borderTexture.loadFromFile(path);
     CFRelease(cstrrefBorder);
+
+    CFStringRef cstrrefFog =
+      CFStringCreateWithCString(NULL, "warp.png", kCFStringEncodingUTF8);
+    getResourcePath(cstrrefFog, path);
+    std::cout << "***path***:" << path << std::endl;
+    m_fogTexture.loadFromFile(path);
+    CFRelease(cstrrefFog);
 }
 
 
