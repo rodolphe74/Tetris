@@ -27,18 +27,19 @@ set(sharedRes
 	resources/three.ogg
 	resources/ready.ogg
 	resources/go.ogg
-    resources/move.ogg
-    resources/asterw.png
-    resources/warp.png
-    resources/explode.ogg
-    resources/rotate.ogg
-    resources/move.ogg
-    resources/line.ogg
-    resources/intro.ogg
-    resources/hurry.ogg
-    resources/gameover.ogg
-    resources/big_square_clear.png
-    resources/borderb.png
+	resources/move.ogg
+	resources/asterw.png
+	resources/warp.png
+	resources/warp.ogg
+	resources/explode.ogg
+	resources/rotate.ogg
+	resources/move.ogg
+	resources/line.ogg
+	resources/intro.ogg
+	resources/hurry.ogg
+	resources/gameover.ogg
+	resources/big_square_clear.png
+	resources/borderb.png
 )
 
 
