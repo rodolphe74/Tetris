@@ -35,10 +35,6 @@ resources::init()
     m_soundWarp.setBuffer(m_soundBufferWarp);
     m_soundBufferIntro.loadFromFile("resources/intro.ogg");
     m_soundIntro.setBuffer(m_soundBufferIntro);
-    m_soundBufferWarp.loadFromFile("resources/warp.ogg");
-    m_soundWarp.setBuffer(m_soundBufferWarp);
-    m_soundBufferIntro.loadFromFile("resources/intro.ogg");
-    m_soundIntro.setBuffer(m_soundBufferIntro);
     m_soundBufferHurry.loadFromFile("resources/hurry.ogg");
     m_soundHurry.setBuffer(m_soundBufferHurry);
     m_soundBufferGameOver.loadFromFile("resources/gameover.ogg");
@@ -49,8 +45,6 @@ resources::init()
 
     m_soundBufferMove.loadFromFile("resources/move.ogg");
     m_soundMove.setBuffer(m_soundBufferMove);
-    m_soundBufferWarp.loadFromFile("resources/warp.ogg");
-    m_soundWarp.setBuffer(m_soundBufferWarp);
 
     m_asterTexture.loadFromFile("resources/asterw.png");
     m_asterSprite.setTexture(m_asterTexture);
@@ -152,13 +146,6 @@ resources::initApple()
     std::cout << "***path***:" << path << std::endl;
     m_asterTexture.loadFromFile(path);
     m_asterSprite.setTexture(m_asterTexture);
-    
-    CFStringRef cstrrefWarpFog =
-      CFStringCreateWithCString(NULL, "warp.png", kCFStringEncodingUTF8);
-    getResourcePath(cstrrefWarpFog, path);
-    std::cout << "***path***:" << path << std::endl;
-    m_fogTexture.loadFromFile(path);
-    CFRelease(cstrrefWarpFog);
     
     CFStringRef cstrrefExplode =
       CFStringCreateWithCString(NULL, "explode.ogg", kCFStringEncodingUTF8);
