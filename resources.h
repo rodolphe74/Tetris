@@ -1,9 +1,9 @@
 #pragma once
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #if defined(__APPLE__)
 #include <CoreFoundation/CoreFoundation.h>
-#include <iostream>
 #endif
 
 
